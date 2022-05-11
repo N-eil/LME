@@ -1,0 +1,111 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://ObjectInfoSheet.gd" type="Script" id=1]
+
+[node name="ObjectInfoSheet" type="PanelContainer"]
+margin_right = 8.0
+margin_bottom = 8.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="VSplitContainer" type="VSplitContainer" parent="."]
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 306.0
+margin_bottom = 83.0
+dragger_visibility = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VSplitContainer"]
+margin_right = 299.0
+margin_bottom = 24.0
+
+[node name="AddNewObjectCheckbox" type="CheckBox" parent="VSplitContainer/HBoxContainer"]
+margin_right = 97.0
+margin_bottom = 24.0
+text = "Add object"
+
+[node name="ObjectTypeMenu" type="OptionButton" parent="VSplitContainer/HBoxContainer"]
+margin_left = 101.0
+margin_right = 130.0
+margin_bottom = 24.0
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VSplitContainer"]
+margin_top = 24.0
+margin_right = 299.0
+margin_bottom = 76.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="VSplitContainer/HSplitContainer"]
+margin_right = 99.0
+margin_bottom = 52.0
+rect_clip_content = true
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VSplitContainer/HSplitContainer/VBoxContainer"]
+margin_right = 99.0
+margin_bottom = 20.0
+
+[node name="SaveButton" type="Button" parent="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+margin_right = 41.0
+margin_bottom = 20.0
+text = "Save"
+
+[node name="CancelButton" type="Button" parent="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+margin_left = 45.0
+margin_right = 99.0
+margin_bottom = 20.0
+text = "Cancel"
+
+[node name="VSplitContainer" type="VSplitContainer" parent="VSplitContainer/HSplitContainer"]
+margin_left = 111.0
+margin_right = 299.0
+margin_bottom = 52.0
+
+[node name="TestFlagsUI" type="VBoxContainer" parent="VSplitContainer/HSplitContainer/VSplitContainer"]
+margin_right = 188.0
+margin_bottom = 20.0
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VSplitContainer/HSplitContainer/VSplitContainer/TestFlagsUI"]
+margin_right = 188.0
+margin_bottom = 20.0
+
+[node name="Label" type="Label" parent="VSplitContainer/HSplitContainer/VSplitContainer/TestFlagsUI/HSplitContainer"]
+margin_top = 3.0
+margin_right = 131.0
+margin_bottom = 17.0
+text = "Test Flag Operations"
+
+[node name="AddTestFlagButton" type="Button" parent="VSplitContainer/HSplitContainer/VSplitContainer/TestFlagsUI/HSplitContainer"]
+margin_left = 143.0
+margin_right = 188.0
+margin_bottom = 20.0
+text = "Add"
+
+[node name="WriteFlagsUI" type="VBoxContainer" parent="VSplitContainer/HSplitContainer/VSplitContainer"]
+margin_top = 32.0
+margin_right = 188.0
+margin_bottom = 52.0
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VSplitContainer/HSplitContainer/VSplitContainer/WriteFlagsUI"]
+margin_right = 188.0
+margin_bottom = 20.0
+
+[node name="Label" type="Label" parent="VSplitContainer/HSplitContainer/VSplitContainer/WriteFlagsUI/HSplitContainer"]
+margin_top = 3.0
+margin_right = 139.0
+margin_bottom = 17.0
+text = "Write Flag Operations"
+
+[node name="AddWriteFlagButton" type="Button" parent="VSplitContainer/HSplitContainer/VSplitContainer/WriteFlagsUI/HSplitContainer"]
+margin_left = 151.0
+margin_right = 188.0
+margin_bottom = 20.0
+text = "Add"
+
+[connection signal="item_selected" from="VSplitContainer/HBoxContainer/ObjectTypeMenu" to="." method="_on_ObjectTypeMenu_item_selected"]
+[connection signal="pressed" from="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer/SaveButton" to="." method="_on_SaveButton_pressed"]
