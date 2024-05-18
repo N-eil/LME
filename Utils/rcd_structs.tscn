@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cvhtlfij2n0jv"]
+
+[ext_resource type="Script" path="res://Utils/rcd_structs.gd" id="1_1f3yk"]
+
+[node name="RcdStructs" type="Node"]
+script = ExtResource("1_1f3yk")

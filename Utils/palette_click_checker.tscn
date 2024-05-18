@@ -1,0 +1,33 @@
+[gd_scene load_steps=3 format=3 uid="uid://2k3gf6fn4vsc"]
+
+[sub_resource type="GDScript" id="GDScript_0ddij"]
+script/source = "extends Area2D
+signal cell_selected (cell)
+var active_cell : Vector2 = Vector2.ZERO
+@export var TILESIZE = 20
+@export var WIDTH = 50
+
+func _draw():
+	draw_rect(Rect2(active_cell.x * TILESIZE, active_cell.y * TILESIZE, TILESIZE, TILESIZE), Color.GREEN, false)
+
+func _on_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			active_cell.x = floor((event.position.x - global_position.x) / TILESIZE)
+			active_cell.y = floor((event.position.y - global_position.y) / TILESIZE)
+			print(active_cell)
+			queue_redraw() 
+			emit_signal(\"cell_selected\", active_cell.x + active_cell.y * WIDTH)
+"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_ej7gu"]
+size = Vector2(1009, 1008)
+
+[node name="PaletteClickChecker" type="Area2D"]
+script = SubResource("GDScript_0ddij")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(494, 494)
+shape = SubResource("RectangleShape2D_ej7gu")
+
+[connection signal="input_event" from="." to="." method="_on_input_event"]

@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="LayerArtPortion" load_steps=2 format=3 uid="uid://dcsmuxkk6biil"]
+
+[ext_resource type="Script" path="res://Utils/layer_art_portion.gd" id="1_45xqv"]
+
+[resource]
+script = ExtResource("1_45xqv")
+height = 0
+width = 0

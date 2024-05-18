@@ -1,0 +1,12 @@
+[gd_scene load_steps=3 format=3 uid="uid://cty0wk2nlqm2i"]
+
+[ext_resource type="TileSet" uid="uid://dm1vq5cqlk8s8" path="res://TileCollision/collision_tileset.tres" id="1_gbles"]
+[ext_resource type="Script" path="res://TileCollision/collision_tilemap.gd" id="2_5fe0m"]
+
+[node name="CollisionTilemap" type="TileMap"]
+tile_set = ExtResource("1_gbles")
+collision_animatable = true
+format = 2
+layer_0/tile_data = PackedInt32Array(0, 327680, 0, 1, 327680, 0, 2, 327680, 0, 3, 327680, 0, 4, 327680, 0, 65540, 327680, 0, 131076, 327680, 0, 131075, 327680, 0, 131074, 327680, 0, 131073, 327680, 0, 131072, 327680, 0, 65536, 327680, 0, 65537, 327680, 0, 65538, 327680, 0, 65539, 327680, 0)
+script = ExtResource("2_5fe0m")
+dimensions = Vector2(64, 48)

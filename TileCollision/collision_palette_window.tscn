@@ -1,0 +1,37 @@
+[gd_scene load_steps=4 format=3 uid="uid://cbykg6ta7p6c5"]
+
+[ext_resource type="Texture2D" uid="uid://blq77c0dnccba" path="res://GRAPHICS/hit_parts.png" id="1_dhoku"]
+[ext_resource type="PackedScene" uid="uid://2k3gf6fn4vsc" path="res://Utils/palette_click_checker.tscn" id="2_rpd5j"]
+
+[sub_resource type="GDScript" id="GDScript_qhitm"]
+script/source = "extends Node2D
+
+@onready var palette = $Sprite2D
+
+func _on_selected(cell):
+	Messages.emit_signal(\"collision_cell_selected\", cell)
+
+func _ready():
+	$PaletteClickChecker.connect(\"cell_selected\", _on_selected)
+"
+
+[node name="CollisionPaletteWindow" type="Window"]
+physics_object_picking = true
+title = "Tile Palette"
+position = Vector2i(0, 36)
+size = Vector2i(1000, 1000)
+content_scale_size = Vector2i(1000, 1000)
+content_scale_mode = 2
+
+[node name="Node2D" type="Node2D" parent="."]
+position = Vector2(0, 50)
+script = SubResource("GDScript_qhitm")
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+show_behind_parent = true
+texture = ExtResource("1_dhoku")
+centered = false
+
+[node name="PaletteClickChecker" parent="Node2D" instance=ExtResource("2_rpd5j")]
+TILESIZE = 10
+WIDTH = 16

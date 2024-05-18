@@ -1,0 +1,69 @@
+[gd_scene load_steps=4 format=3 uid="uid://c2qy35xddt57r"]
+
+[ext_resource type="Texture2D" uid="uid://wnwxnoatiitf" path="res://GRAPHICS/map00_1.png" id="1_rdx8v"]
+[ext_resource type="PackedScene" uid="uid://2k3gf6fn4vsc" path="res://Utils/palette_click_checker.tscn" id="2_sybpb"]
+
+[sub_resource type="GDScript" id="GDScript_2v2bk"]
+script/source = "extends Node2D
+
+@onready var palette = $Sprite2D
+
+func _on_selected(cell):
+	Messages.emit_signal(\"art_cell_selected\", cell)
+
+func _on_new_palette(new_filename):
+	palette.texture = load(new_filename)
+
+func _ready():
+	Messages.connect(\"new_art_palette\", _on_new_palette)
+	$PaletteClickChecker.connect(\"cell_selected\", _on_selected)
+
+func _on_check_box_toggled(toggled_on, extra_arg_0):
+	Globals.tile_draw_settings[extra_arg_0] = toggled_on
+"
+
+[node name="TilePaletteWindow" type="Window"]
+physics_object_picking = true
+title = "Tile Palette"
+position = Vector2i(0, 36)
+size = Vector2i(1000, 1000)
+content_scale_size = Vector2i(1000, 1000)
+content_scale_mode = 2
+
+[node name="Node2D" type="Node2D" parent="."]
+position = Vector2(0, 50)
+script = SubResource("GDScript_2v2bk")
+
+[node name="Sprite2D" type="Sprite2D" parent="Node2D"]
+show_behind_parent = true
+texture = ExtResource("1_rdx8v")
+centered = false
+
+[node name="PaletteClickChecker" parent="Node2D" instance=ExtResource("2_sybpb")]
+
+[node name="Checkboxes" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Checkboxes"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="CheckBox" type="CheckBox" parent="Checkboxes/HBoxContainer"]
+layout_mode = 2
+text = "Flip Horizontally"
+
+[node name="CheckBox2" type="CheckBox" parent="Checkboxes/HBoxContainer"]
+layout_mode = 2
+text = "Rotate 90 Degrees"
+
+[node name="CheckBox3" type="CheckBox" parent="Checkboxes/HBoxContainer"]
+layout_mode = 2
+text = "Rotate 180 Degrees"
+
+[connection signal="toggled" from="Checkboxes/HBoxContainer/CheckBox" to="Node2D" method="_on_check_box_toggled" binds= [0]]
+[connection signal="toggled" from="Checkboxes/HBoxContainer/CheckBox2" to="Node2D" method="_on_check_box_toggled" binds= [1]]
+[connection signal="toggled" from="Checkboxes/HBoxContainer/CheckBox3" to="Node2D" method="_on_check_box_toggled" binds= [2]]

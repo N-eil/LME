@@ -1,0 +1,17 @@
+[gd_scene load_steps=2 format=3 uid="uid://bhbiho5r03tp8"]
+
+[sub_resource type="GDScript" id="GDScript_763k5"]
+script/source = "extends Node2D
+@export var TILESIZE = 20
+@export var width = 32
+@export var height = 24
+
+func _draw():
+	for col in width + 1:
+		draw_line(Vector2(col * TILESIZE, 0), Vector2(col * TILESIZE, height *TILESIZE), Color.GREEN)
+	for row in height + 1:
+		draw_line(Vector2(0, row * TILESIZE), Vector2(width * TILESIZE, row * TILESIZE), Color.GREEN)
+"
+
+[node name="TileGridlines" type="Node2D"]
+script = SubResource("GDScript_763k5")

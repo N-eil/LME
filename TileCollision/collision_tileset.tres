@@ -1,0 +1,64 @@
+[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://dm1vq5cqlk8s8"]
+
+[ext_resource type="Texture2D" uid="uid://blq77c0dnccba" path="res://GRAPHICS/hit_parts.png" id="1_u6dk2"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_sqcdy"]
+texture = ExtResource("1_u6dk2")
+texture_region_size = Vector2i(10, 10)
+0:0/0 = 0
+1:0/0 = 0
+2:0/0 = 0
+3:0/0 = 0
+4:0/0 = 0
+5:0/0 = 0
+6:0/0 = 0
+7:0/0 = 0
+8:0/0 = 0
+0:1/0 = 0
+1:1/0 = 0
+2:1/0 = 0
+3:1/0 = 0
+4:1/0 = 0
+5:1/0 = 0
+0:2/0 = 0
+0:8/0 = 0
+1:8/0 = 0
+9:0/0 = 0
+10:0/0 = 0
+11:0/0 = 0
+12:0/0 = 0
+13:0/0 = 0
+6:1/0 = 0
+7:1/0 = 0
+8:1/0 = 0
+0:3/0 = 0
+2:8/0 = 0
+3:8/0 = 0
+4:8/0 = 0
+5:8/0 = 0
+6:8/0 = 0
+7:8/0 = 0
+8:8/0 = 0
+9:8/0 = 0
+10:8/0 = 0
+12:8/0 = 0
+13:8/0 = 0
+14:8/0 = 0
+15:8/0 = 0
+0:9/0 = 0
+1:9/0 = 0
+2:9/0 = 0
+1:10/0 = 0
+3:10/0 = 0
+6:10/0 = 0
+7:10/0 = 0
+10:10/0 = 0
+11:10/0 = 0
+5:11/0 = 0
+6:11/0 = 0
+0:12/0 = 0
+1:12/0 = 0
+
+[resource]
+tile_size = Vector2i(10, 10)
+sources/0 = SubResource("TileSetAtlasSource_sqcdy")

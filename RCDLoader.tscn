@@ -1,13 +1,32 @@
-[gd_scene load_steps=3 format=2]
+[gd_scene load_steps=8 format=3 uid="uid://duiv774xrp5de"]
 
-[ext_resource path="res://RCDLoader.gd" type="Script" id=1]
-[ext_resource path="res://ObjectInfoSheet.tscn" type="PackedScene" id=2]
+[ext_resource type="Script" path="res://RCDLoader.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://dcelqgdiyou5u" path="res://ObjectInfoSheet.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://bg8rvyokyatv8" path="res://TileVisualDisplay/LayerCompositeDisplay.tscn" id="4_j1fbf"]
+[ext_resource type="PackedScene" uid="uid://c2qy35xddt57r" path="res://TileVisualDisplay/tile_palette_window.tscn" id="4_l5aqg"]
+[ext_resource type="PackedScene" uid="uid://cty0wk2nlqm2i" path="res://TileCollision/collision_tilemap.tscn" id="5_5ct60"]
+[ext_resource type="PackedScene" uid="uid://cbykg6ta7p6c5" path="res://TileCollision/collision_palette_window.tscn" id="6_u7iu8"]
+
+[sub_resource type="GDScript" id="1"]
+script/source = "extends TabContainer
+# Called every frame. 'delta' is the elapsed time since the previous frame.
+#func _process(delta):
+#	pass
+@onready var editor = get_parent()
+
+func _on_Layers_pressed():
+	editor.current_editing_type = editor.canvas_editing_types.LAYERS
+
+func _on_Collision_pressed():
+	editor.current_editing_type = editor.canvas_editing_types.COLLISION
+"
 
 [node name="rcdloader" type="Node"]
-script = ExtResource( 1 )
+script = ExtResource("1")
 
 [node name="RoomCanvas" type="Node2D" parent="."]
-position = Vector2( 43.5581, 114.661 )
+visible = false
+position = Vector2(43.5581, 114.661)
 
 [node name="Objects" type="Node2D" parent="RoomCanvas"]
 z_index = 150
@@ -21,140 +40,103 @@ z_index = 200
 z_index = 200
 
 [node name="RoomJump" type="HBoxContainer" parent="Node2D"]
-margin_right = 316.0
-margin_bottom = 59.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+offset_right = 316.0
+offset_bottom = 59.0
 
 [node name="HBoxContainer" type="VBoxContainer" parent="Node2D/RoomJump"]
-margin_right = 58.0
-margin_bottom = 59.0
+layout_mode = 2
 
 [node name="RichTextLabel" type="Label" parent="Node2D/RoomJump/HBoxContainer"]
-margin_right = 58.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Zone ID"
 
 [node name="ZoneEdit" type="LineEdit" parent="Node2D/RoomJump/HBoxContainer"]
-margin_top = 18.0
-margin_right = 58.0
-margin_bottom = 42.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+layout_mode = 2
 
 [node name="HBoxContainer2" type="VBoxContainer" parent="Node2D/RoomJump"]
-margin_left = 62.0
-margin_right = 120.0
-margin_bottom = 59.0
+layout_mode = 2
 
 [node name="RichTextLabel" type="Label" parent="Node2D/RoomJump/HBoxContainer2"]
-margin_right = 58.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Room ID"
 
 [node name="RoomEdit" type="LineEdit" parent="Node2D/RoomJump/HBoxContainer2"]
-margin_top = 18.0
-margin_right = 58.0
-margin_bottom = 42.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+layout_mode = 2
 
 [node name="HBoxContainer3" type="VBoxContainer" parent="Node2D/RoomJump"]
-margin_left = 124.0
-margin_right = 186.0
-margin_bottom = 59.0
+layout_mode = 2
 
 [node name="RichTextLabel" type="Label" parent="Node2D/RoomJump/HBoxContainer3"]
-margin_right = 62.0
-margin_bottom = 14.0
+layout_mode = 2
 text = "Screen ID"
 
 [node name="ScreenEdit" type="LineEdit" parent="Node2D/RoomJump/HBoxContainer3"]
 visible = false
-margin_right = 58.0
-margin_bottom = 24.0
-__meta__ = {
-"_edit_use_anchors_": false
-}
+layout_mode = 2
 
 [node name="ScreenSelector" type="OptionButton" parent="Node2D/RoomJump/HBoxContainer3"]
-margin_top = 18.0
-margin_right = 62.0
-margin_bottom = 38.0
-align = 1
+layout_mode = 2
 
 [node name="Jump" type="Button" parent="Node2D/RoomJump"]
-margin_left = 190.0
-margin_right = 224.0
-margin_bottom = 59.0
+layout_mode = 2
 text = "Go!"
 
 [node name="Write" type="Button" parent="Node2D/RoomJump"]
-margin_left = 228.0
-margin_right = 316.0
-margin_bottom = 59.0
+layout_mode = 2
 text = "Write to file"
-__meta__ = {
-"_edit_use_anchors_": false
-}
 
 [node name="Add new room" type="Button" parent="Node2D/RoomJump"]
-margin_left = 320.0
-margin_right = 434.0
-margin_bottom = 59.0
+layout_mode = 2
 text = "Add new screen"
 
 [node name="CollisionCheckbox" type="CheckBox" parent="Node2D/RoomJump"]
-margin_left = 438.0
-margin_right = 579.0
-margin_bottom = 59.0
-pressed = true
+layout_mode = 2
 text = "Also add collision"
 
 [node name="EditType" type="TabContainer" parent="."]
-margin_left = 772.644
-margin_top = 45.0
-margin_right = 1072.64
-margin_bottom = 101.0
+offset_left = 772.644
+offset_top = 45.0
+offset_right = 1111.64
+offset_bottom = 181.0
+scale = Vector2(0.8, 0.8)
 use_hidden_tabs_for_min_size = true
-__meta__ = {
-"_edit_use_anchors_": false
-}
+script = SubResource("1")
 
-[node name="Layers" type="Button" parent="EditType"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
-text = "Layers"
+[node name="Layers" type="PanelContainer" parent="EditType"]
+layout_mode = 2
 
-[node name="Collision" type="Button" parent="EditType"]
+[node name="LayerTree" type="Tree" parent="EditType/Layers"]
+layout_mode = 2
+columns = 2
+
+[node name="Collision" type="PanelContainer" parent="EditType"]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
+
+[node name="Collision" type="Button" parent="EditType/Collision"]
+layout_mode = 2
 text = "Collision"
 
-[node name="Objects" parent="EditType" instance=ExtResource( 2 )]
+[node name="Objects" parent="EditType" instance=ExtResource("2")]
 visible = false
-anchor_right = 1.0
-anchor_bottom = 1.0
-margin_left = 4.0
-margin_top = 32.0
-margin_right = -4.0
-margin_bottom = -4.0
+layout_mode = 2
+
+[node name="TilePaletteWindow" parent="." instance=ExtResource("4_l5aqg")]
+
+[node name="LayerCompositeDisplay" parent="." instance=ExtResource("4_j1fbf")]
+position = Vector2(64, 128)
+
+[node name="CollisionTilemap" parent="." instance=ExtResource("5_5ct60")]
+modulate = Color(1, 1, 1, 0.45098)
+position = Vector2(64, 128)
+
+[node name="CollisionPaletteWindow" parent="." instance=ExtResource("6_u7iu8")]
 
 [connection signal="item_selected" from="Node2D/RoomJump/HBoxContainer3/ScreenSelector" to="." method="_on_screen_selected"]
 [connection signal="pressed" from="Node2D/RoomJump/Jump" to="." method="_on_Jump_pressed"]
 [connection signal="pressed" from="Node2D/RoomJump/Write" to="." method="_on_Button_pressed"]
 [connection signal="pressed" from="Node2D/RoomJump/Add new room" to="." method="_on_add_new_room_pressed"]
+[connection signal="tab_changed" from="EditType" to="." method="_on_EditType_tab_changed"]
+[connection signal="item_edited" from="EditType/Layers/LayerTree" to="." method="_on_LayerTree_item_edited"]
 
 [editable path="EditType/Objects"]

@@ -6,18 +6,27 @@
 ;   [section] ; section goes between []
 ;   param=value ; assign values to parameters
 
-config_version=4
+config_version=5
 
 [application]
 
 config/name="Lme"
 run/main_scene="res://RCDLoader.tscn"
+config/features=PackedStringArray("4.3")
 config/icon="res://icon.png"
+
+[autoload]
+
+Globals="*res://Globals.gd"
+Messages="*res://Utils/Messages.gd"
 
 [display]
 
-window/size/width=1260
-window/size/height=800
+window/size/viewport_width=1260
+window/size/viewport_height=800
+window/subwindows/embed_subwindows=false
+window/stretch/mode="viewport"
+window/stretch/aspect="ignore"
 
 [physics]
 
@@ -25,4 +34,4 @@ common/enable_pause_aware_picking=true
 
 [rendering]
 
-environment/default_environment="res://default_env.tres"
+environment/defaults/default_environment="res://default_env.tres"
