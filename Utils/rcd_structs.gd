@@ -5,7 +5,7 @@ class_name RcdStructs
 class Field:
 	var name_size: int
 	var objects_count: int
-	var name: Array  # Array of bytes. Need to decode as UTF16 for text
+	var name: Array  # Array of bytes. Need to decode as UTF16 for text. Does nothing, do not name a zone by writing to this
 	var objects: Array
 	var rooms: Array
 
@@ -19,7 +19,7 @@ class Field:
 		room_count += 1
 		rooms[room_id].add_screen(zone_id)
 
-	func read(data : StreamPeerBuffer, msd : MsdStructs.MSDMap):
+	func read(data : StreamPeerBuffer, msd : MSDMap):
 		room_count = msd.room_count
 		
 		name_size = data.get_8()
@@ -71,8 +71,8 @@ class EditorRoom:
 		neighbouring_screen.exits[1] = Exit.new(zone_id, room_id, screen_id)
 		screens.append(s)
 		
-	func read(data : StreamPeerBuffer, screen_count: int):
-		self.screen_count = screen_count
+	func read(data : StreamPeerBuffer, read_screen_count: int):
+		screen_count = read_screen_count
 		
 		room_object_count = data.get_16()
 		for i in range(room_object_count):

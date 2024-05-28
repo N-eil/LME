@@ -23,7 +23,7 @@ func _on_EditType_tab_changed(tab):
 # var a = 2
 # var b = "text"
 var loaded_rsd_buffer
-var all_fields = []
+
 var all_msd = []
 const TILESIZE = 20
 
@@ -31,6 +31,18 @@ const TILESIZE = 20
 const current_directory = "C:/Users/Neil/Documents/godot/Godot_v4.0-stable_win64.exe/la mulana/la mulana editor/LME/"
 var msd_directory = current_directory.path_join("MSD")
 var graphics_directory = current_directory.path_join("GRAPHICS")
+
+func load_screenplay(path):
+	path = current_directory.path_join("script_code.dat")
+	var loaded_buffer = StreamPeerBuffer.new()
+	var screenplay_file = FileAccess.open(path, FileAccess.READ)
+	var temp_buffer = screenplay_file.get_buffer(screenplay_file.get_length())
+
+	loaded_buffer.put_data(temp_buffer)
+	loaded_buffer.big_endian = true
+	loaded_buffer.seek(0)
+	Globals.all_screenplay = ScreenplayFull.new()
+	Globals.all_screenplay.decode_from_stream(loaded_buffer)
 
 func load_rcd():
 	loaded_rsd_buffer = StreamPeerBuffer.new()
@@ -49,7 +61,7 @@ func write_rcd(file_to_write, output_buffer):
 	file_to_write.store_buffer(output_buffer.data_array)
 
 func load_msd(path, id, sizes_only = false):
-	print("Reaing MSD " + path)
+	print("Reading MSD " + path)
 	var loaded_buffer = StreamPeerBuffer.new()
 	var msd_file = FileAccess.open(path, FileAccess.READ)
 	var temp_buffer = msd_file.get_buffer(msd_file.get_length())
@@ -58,7 +70,7 @@ func load_msd(path, id, sizes_only = false):
 	loaded_buffer.big_endian = true
 	loaded_buffer.seek(0)
 
-	var m = MsdStructs.MSDMap.new()
+	var m = MSDMap.new()
 	if (sizes_only):
 		m.read_sizes(loaded_buffer, id)
 	else:
@@ -68,20 +80,25 @@ func load_msd(path, id, sizes_only = false):
 	return m
 
 
-var current_msd_file : MsdStructs.MSDMap
+var current_msd_file : MSDMap
 var current_zone_id
 var current_room_id
 var current_screen_id
 
-func convert_tile_coord_to_data(layer : MsdStructs.Layer):
+func show_fieldmap(field_num):
+	$FieldMapView.map_name_card = Globals.all_screenplay.cards[Globals.all_screenplay.map_name_cards[field_num]]
+	$FieldMapView.map_display_card = Globals.all_screenplay.cards[Globals.all_screenplay.map_display_cards[field_num]]
+
+
+func convert_tile_coord_to_data(layer : Layer):
 	pass
 	
 func screen_exists(z, r = 0, s = 0):
-	if z >= all_fields.size():
+	if z >= Globals.all_fields.size():
 		return false
-	if r >= all_fields[z].room_count:
+	if r >= Globals.all_fields[z].room_count:
 		return false
-	if s >= all_fields[z].rooms[r].screen_count and all_fields[z].rooms[r].screen_count != 0:
+	if s >= Globals.all_fields[z].rooms[r].screen_count and Globals.all_fields[z].rooms[r].screen_count != 0:
 		return false
 	return true    
 	
@@ -106,10 +123,10 @@ func display_objects_in_screen(location, zone_id, room_id, screen_id):
 	for c in location.get_children():
 		c.queue_free()
  
-	if !screen_exists(zone_id, room_id, screen_id) or all_fields[zone_id].rooms[room_id].screen_count == 0:
+	if !screen_exists(zone_id, room_id, screen_id) or Globals.all_fields[zone_id].rooms[room_id].screen_count == 0:
 		return
 
-	var display_screen = all_fields[zone_id].rooms[room_id].screens[screen_id]
+	var display_screen = Globals.all_fields[zone_id].rooms[room_id].screens[screen_id]
  
 	for object in display_screen.screen_objects:
 		var o = object_placeholder_prefab.instantiate()
@@ -145,6 +162,7 @@ func display_room(zone_id, room_id):
 		current_zone_id = zone_id
 		msd = load_msd(msd_directory.path_join("map" + ("%02d" % zone_id) + ".msd"), zone_id)
 		current_msd_file = msd
+		show_fieldmap(zone_id)
 
 	$Node2D/RoomJump/HBoxContainer3/ScreenSelector.clear()
 	for i in range(current_msd_file.rooms[room_id].screen_count):
@@ -155,13 +173,14 @@ func display_room(zone_id, room_id):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	load_rcd()
+	load_rcd() #TODO: read the RCD again
+	load_screenplay("ignore this")
 	
 	for i in range(26):
 		var f = RcdStructs.Field.new(i)
 		var msd = load_msd(msd_directory.path_join("map" + ("%02d" % i) + ".msd"), i, true)
 		f.read(loaded_rsd_buffer, msd)
-		all_fields.append(f)
+		Globals.all_fields.append(f)
 		if i >  15:
 			print(i)
 #        all_msd.append(msd)
@@ -193,7 +212,6 @@ func _on_Button_pressed():
 #    all_fields[0].rooms[1].screens[2].exits[1].screen_id = 0
 #    all_fields[0].rooms[1].screens[2].exits[1].room_id = 2
 	$Node2D/RoomJump/Write.text = "Saving..."
-	clear_room_visuals(0,5) # Clears out a room for fun visual effects TODDO: Remove
 
 	save_msd_changes()
 	save_rcd_changes()
@@ -212,9 +230,7 @@ func save_msd_changes():
 	written_msd.close()
 
 	print("MSD written!")
-	print(current_msd_file.resource_path)
-	ResourceSaver.save(current_msd_file, "testres.tres")
-	
+	current_msd_file.rooms[current_room_id].write_to_file()
 
 func save_rcd_changes():
 	var game_current_directory = "C:/Program Files (x86)/Steam/steamapps/common/La-Mulana/data/mapdata"
@@ -225,7 +241,7 @@ func save_rcd_changes():
 	output_buffer.seek(0)
 	output_buffer.put_16(0)
 	
-	for field in all_fields:
+	for field in Globals.all_fields:
 		field.write(output_buffer)
 	write_rcd(write_file, output_buffer)
 	print("RCD WRITTEN")
@@ -252,8 +268,6 @@ func cell_clicked(tilemap, position):
 		add_visual_tile(tilemap, position,new_coords)
 	elif current_editing_type == canvas_editing_types.OBJECTS:
 		add_position_object(position, new_object)
-	elif current_editing_type == canvas_editing_types.COLLISION:
-		add_collision(position, current_msd_file.rooms[current_room_id])
  
 func add_visual_tile(tilemap, position, new_coords, new_type = 1): 
 	tilemap.set_cell(position.x, position.y, new_coords)
@@ -273,22 +287,11 @@ func add_visual_tile(tilemap, position, new_coords, new_type = 1):
 func add_position_object(position, new_o):
 	new_o.position_x = position.x
 	new_o.position_y = position.y
-	all_fields[current_zone_id].rooms[current_room_id].screens[current_screen_id].add_pos_object(new_o)
-
-func add_collision(position, room, collision_type  = 0x80):  #TODO: More granular collision drawing!
-
-	var top_left = room.get_hitmask_top_left(current_screen_id)
-	
-	# NOTE TO NEIL: the *2 exits because hitmask cells are half size.  if a hitmask draw mode is made, this might no longer be needed
-	room.hit_mask[position.y*2 + top_left.y][position.x*2 + top_left.x] = collision_type
-	room.hit_mask[position.y*2 + top_left.y + 1][position.x*2 + top_left.x] = collision_type
-	room.hit_mask[position.y*2 + top_left.y][position.x*2 + top_left.x + 1] = collision_type
-	room.hit_mask[position.y*2 + top_left.y + 1][position.x*2 + top_left.x + 1] = collision_type  
-	
+	Globals.all_fields[current_zone_id].rooms[current_room_id].screens[current_screen_id].add_pos_object(new_o)
 
 func _on_add_new_room_pressed():
 	current_msd_file.rooms[current_room_id].add_screen(current_screen_id)
-	all_fields[current_zone_id].rooms[current_room_id].add_screen(current_zone_id)
+	Globals.all_fields[current_zone_id].rooms[current_room_id].add_screen(current_zone_id)
 
 	$Node2D/RoomJump/HBoxContainer3/ScreenSelector.clear()
 	for i in range(current_msd_file.rooms[current_room_id].screen_count):
@@ -296,8 +299,25 @@ func _on_add_new_room_pressed():
 	
 	current_screen_id = -1
 	#display_screen($RoomCanvas/Visuals, current_zone_id, current_room_id, 0)
-	_on_screen_selected(all_fields[current_zone_id].rooms[current_room_id].screen_count -1)
+	_on_screen_selected(Globals.all_fields[current_zone_id].rooms[current_room_id].screen_count -1)
 
 
 func _on_LayerTree_button_pressed(item, column, id):
 	print(item)
+
+
+func _on_edit_type_selected(index):
+	match index:
+		0:
+			Globals.current_edit_type = Globals.EditType.NONE
+		1:
+			Globals.current_edit_type = Globals.EditType.ART
+			$LayerCompositeDisplay/EditType.visible = true
+		2:
+			printerr("Unimplemented edit type")
+		3:
+			Globals.current_edit_type = Globals.EditType.COLLISION
+			$LayerCompositeDisplay/EditType.visible = false
+		4:
+			Globals.current_edit_type = Globals.EditType.OBJECT
+			$LayerCompositeDisplay/EditType.visible = false

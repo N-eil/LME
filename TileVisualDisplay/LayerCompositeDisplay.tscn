@@ -8,6 +8,10 @@ script/source = "extends Node2D
 var active_tileset : TileSet
 var active_tileset_filename : String
 var active_editing_sublayer : Node2D = null
+
+@onready var layer_tree : Tree = $EditType/Layers/LayerTree
+var current_selected_layer : TreeItem = null
+
 #var all_layer_nodes : Array[LayerPortionDisplay]
 @onready var portion_prefab = load(\"res://TileVisualDisplay/layer_portion_display.tscn\")
 
@@ -30,11 +34,11 @@ func load_graphics_to_tileset(path, animated_tiles_map, tilesize = 20):
 #		ts.tile_set_region(id, r)
 	return ts
 
-func set_editing_sublayer(l, s):
+func set_editing_sublayer(layer_info : Vector2i):
 	if active_editing_sublayer:
 		active_editing_sublayer.set_process_unhandled_input(false)
-	print(\"ready to edit layer\" , l, \"   sublayer \" , s)
-	active_editing_sublayer = $LayerHolder.get_child(l).get_child(s)
+	print(\"ready to edit layer \" , layer_info[0], \"   sublayer \" , layer_info[1])
+	active_editing_sublayer = $LayerHolder.get_child(layer_info[0]).get_child(layer_info[1])
 	active_editing_sublayer.set_process_unhandled_input(true)
 
 func rebuild_tileset(filename, tilesize = 20):
@@ -53,9 +57,9 @@ func clear_display():
 		c.free()
 
 # Gets from an MSD, and creates the resources for each layer in the room
-func generate_from_msd(msd : MsdStructs.MSDMap, r_index : int = 0, s_index = 0):
+func generate_from_msd(msd : MSDMap, r_index : int = 0, s_index = 0):
 	clear_display()
-	var msd_room : MsdStructs.MSDRoom = msd.rooms[r_index]
+	var msd_room : MSDRoom = msd.rooms[r_index]
 	var layer_z = 0
 	for layer in msd_room.layers:
 		var visual_layer : LayerPortionDisplay = portion_prefab.instantiate()
@@ -76,15 +80,14 @@ func generate_from_msd(msd : MsdStructs.MSDMap, r_index : int = 0, s_index = 0):
 
 
 func fill_layer_UI():
-	var tree = $EditType/Layers/LayerTree
-	tree.clear()
-	var root = tree.create_item()
+	layer_tree.clear()
+	var root = layer_tree.create_item()
 	
 	for layer_node in $LayerHolder.get_children():
 		var layer = layer_node.to_display.stored_layer
-		var tree_layer = tree.create_item(root)
+		var tree_layer = layer_tree.create_item(root)
 		tree_layer.set_text(0, \"LAYER - Height: \" + str(layer.layer_height) + \" Width: \" + str(layer.layer_width) )
-		tree_layer.set_selectable(0, false)
+		tree_layer.set_selectable(0, true)
 		tree_layer.set_selectable(1, false)
 		tree_layer.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)
 		tree_layer.set_checked(1, true)
@@ -93,9 +96,9 @@ func fill_layer_UI():
 		tree_layer.set_metadata(0, layer)
 		
 		for sublayer_node in layer_node.get_children():
-			var tree_sublayer = tree.create_item(tree_layer)
+			var tree_sublayer = layer_tree.create_item(tree_layer)
 			tree_sublayer.set_text(0, \"Sublayer\")
-			tree_sublayer.set_selectable(0, false)
+			tree_sublayer.set_selectable(0, true)
 			tree_sublayer.set_selectable(1, false)
 			tree_sublayer.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)
 			tree_sublayer.set_checked(1, true)
@@ -105,13 +108,14 @@ func fill_layer_UI():
 
 	$EditType.size = Vector2(300,600)
 
+func get_sublayer_info_from_tree(tree_layer):
+	return Vector2(tree_layer.get_parent().get_index(), tree_layer.get_index())
+
 func _on_LayerTree_item_edited():
-	var checked_layer : TreeItem = $EditType/Layers/LayerTree.get_edited()
+	var checked_layer : TreeItem = layer_tree.get_edited()
 	var checked_metadata = checked_layer.get_metadata(0)
 	if checked_metadata is TileMap:
-		var sublayer_index = checked_layer.get_index()
-		var layer_index = checked_layer.get_parent().get_index()
-		set_editing_sublayer(layer_index,sublayer_index)
+		set_editing_sublayer(get_sublayer_info_from_tree(checked_layer))
 		var screen_layer = checked_metadata as TileMap
 		screen_layer.visible = checked_layer.is_checked(1)
 	else:
@@ -119,6 +123,16 @@ func _on_LayerTree_item_edited():
 			var sublayer_metadata = sublayer.get_metadata(0) as TileMap
 			sublayer_metadata.visible = checked_layer.is_checked(1)
 			sublayer.set_checked(1, checked_layer.is_checked(1))
+
+
+func _on_layer_tree_item_selected():
+	if current_selected_layer:
+		current_selected_layer.clear_custom_bg_color(0)
+	
+	current_selected_layer = layer_tree.get_selected()
+	current_selected_layer.set_custom_bg_color(0, Color.RED)
+	if current_selected_layer.get_metadata(0) is TileMap:
+		set_editing_sublayer(get_sublayer_info_from_tree(current_selected_layer))
 "
 
 [sub_resource type="GDScript" id="GDScript_6al7e"]
@@ -160,3 +174,4 @@ columns = 2
 visible = false
 
 [connection signal="item_edited" from="EditType/Layers/LayerTree" to="." method="_on_LayerTree_item_edited"]
+[connection signal="item_selected" from="EditType/Layers/LayerTree" to="." method="_on_layer_tree_item_selected"]

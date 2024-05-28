@@ -13,18 +13,21 @@ func _on_selected(cell):
 
 func _ready():
 	$PaletteClickChecker.connect(\"cell_selected\", _on_selected)
+	Messages.connect(\"edit_type_changed\", _on_edit_type_changed)
+
+func _on_edit_type_changed(e):
+	get_parent().visible = (e == Globals.EditType.COLLISION)
 "
 
 [node name="CollisionPaletteWindow" type="Window"]
 physics_object_picking = true
 title = "Tile Palette"
-position = Vector2i(0, 36)
-size = Vector2i(1000, 1000)
-content_scale_size = Vector2i(1000, 1000)
+position = Vector2i(0, 32)
+size = Vector2i(160, 160)
+content_scale_size = Vector2i(160, 160)
 content_scale_mode = 2
 
 [node name="Node2D" type="Node2D" parent="."]
-position = Vector2(0, 50)
 script = SubResource("GDScript_qhitm")
 
 [node name="Sprite2D" type="Sprite2D" parent="Node2D"]

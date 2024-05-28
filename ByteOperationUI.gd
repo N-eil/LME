@@ -23,13 +23,13 @@ const TEST_OPERATIONS = [
 	"Bitwise AND nonzero",
 	"Bitwise OR nonzero",
 	"Bitwise XOR nonzero",
-	"Flag is zero",
+#	"Flag is zero",
 	"Not equal",
 	"Greater than",
 	"Less than",
 	"Bitwise AND zero",
 	"Bitwise OR zero",
-	"Bitwise XOR zero",
+#	"Bitwise XOR zero",
 	"Flag is nonzero"
 ]
 	

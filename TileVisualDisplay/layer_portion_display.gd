@@ -15,13 +15,14 @@ func _ready():
 
 func cell_clicked(l, pos):
 	if Globals.current_edit_type == Globals.EditType.ART:
-		update_single_cell(l.get_index(), pos.x, pos.y)
+		update_single_cell(l, pos.x, pos.y)
 
 func clear_display():
 	for c in get_children():
 		c.queue_free()
 
-func update_single_cell(sublayer_index, x, y):
+func update_single_cell(sublayer, x, y):
+	var sublayer_index = sublayer.get_index()
 	to_display.set_tile_coords(x, y, Globals.active_art_tile_index, sublayer_index, Globals.tile_draw_settings)
 	var tile = to_display.stored_layer.sublayers[sublayer_index].tiles[top_left_offset.y + y][top_left_offset.x + x]
 	set_single_cell_with_flips(get_child(sublayer_index), Vector2i(x,y), Vector2i(tile.coords%50, floor(tile.coords/50)), Globals.tile_draw_settings)
@@ -67,9 +68,9 @@ func display_portion(tilesize = to_display.TILESIZE):
 		
 
 		sublayer_z -= 1
-		if (layer.horizontal_screen_count < 1):
-			tilemap.width = layer.layer_width
-			tilemap.height = layer.layer_height
+		#if (layer.horizontal_screen_count < 1):
+			#tilemap.width = layer.layer_width
+			#tilemap.height = layer.layer_height
 		
 		var blend_set = false
 		var i = 0
@@ -81,7 +82,7 @@ func display_portion(tilesize = to_display.TILESIZE):
 				if (j >= layer.layer_width):
 					break 
 				var flip_flags = [false, false, false]                  
-				var tile : MsdStructs.Tile = sublayer.tiles[top_left_offset.y + i][top_left_offset.x + j]
+				var tile : Sublayer.Tile = sublayer.tiles[top_left_offset.y + i][top_left_offset.x + j]
 				if tile.flipped_horizontally:
 					flip_flags[0] = !flip_flags[0]
 				if tile.rotated_90:

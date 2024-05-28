@@ -17,9 +17,13 @@ func _on_new_palette(new_filename):
 func _ready():
 	Messages.connect(\"new_art_palette\", _on_new_palette)
 	$PaletteClickChecker.connect(\"cell_selected\", _on_selected)
+	Messages.connect(\"edit_type_changed\", _on_edit_type_changed)
 
 func _on_check_box_toggled(toggled_on, extra_arg_0):
 	Globals.tile_draw_settings[extra_arg_0] = toggled_on
+
+func _on_edit_type_changed(e):
+	get_parent().visible = (e == Globals.EditType.ART)
 "
 
 [node name="TilePaletteWindow" type="Window"]

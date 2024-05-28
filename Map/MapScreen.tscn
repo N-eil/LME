@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://b3khfvpx88fe"]
+
+[ext_resource type="Script" path="res://Map/MapScreen.gd" id="1_snedg"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_5sxg3"]
+
+[node name="MapScreen" type="Area2D"]
+script = ExtResource("1_snedg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("RectangleShape2D_5sxg3")
+
+[connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

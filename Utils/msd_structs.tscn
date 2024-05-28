@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://b7fsecqeirvng"]
-
-[ext_resource type="Script" path="res://Utils/msd_structs.gd" id="1_i8hys"]
-
-[node name="MsdStructs" type="Node"]
-script = ExtResource("1_i8hys")

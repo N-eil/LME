@@ -1,0 +1,95 @@
+[gd_scene load_steps=2 format=3 uid="uid://b7i6ccua2bcft"]
+
+[sub_resource type="GDScript" id="GDScript_x5kdw"]
+script/source = "extends Node2D
+@export var map_display_card = ScreenplayCard :
+	set (m):
+		map_display_card = m
+		place_screens()
+
+@export var map_name_card = ScreenplayCard 
+@onready var packed_screen = preload(\"res://Map/MapScreen.tscn\")
+const SCREEN_BUFFER = Vector2i(5,5)
+#   ICON AND COLOUR REFERENCE
+#	// Icons: 0 - blank
+	#//        1 - Backside door
+	#//        2 - Grail point
+	#//        3 - Cross of light
+	#//        4 - Fairy point
+	#//        5 - Brown Door
+	#//        6 - Blue Door
+	#//        7 - Philosopher Door
+	#//        8 - Up exit
+	#//        9 - Down exit
+	#//       10 - Left exit
+	#//       11 - Right exit
+	#//       12 - Dragon bone
+	#//       13+ - Dragon bone
+	#
+	#// Colors: 0 - Invisible -- Icons do not show.
+	#//         1 - White
+	#//         2 - Green
+	#//         3 - Yellow
+	#//         4 - Red
+	#//         5 - Blue
+	#//         6+- Transparent -- Icons show
+		#// Icons: 0 - blank
+	#//        1 - Backside door
+	#//        2 - Grail point
+	#//        3 - Cross of light
+	#//        4 - Fairy point
+	#//        5 - Brown Door
+	#//        6 - Blue Door
+	#//        7 - Philosopher Door
+	#//        8 - Up exit
+	#//        9 - Down exit
+	#//       10 - Left exit
+	#//       11 - Right exit
+	#//       12 - Dragon bone
+	#//       13+ - Dragon bone
+	#
+	#// Colors: 0 - Invisible -- Icons do not show.
+	#//         1 - White
+	#//         2 - Green
+	#//         3 - Yellow
+	#//         4 - Red
+	#//         5 - Blue
+	#//         6+- Transparent -- Icons show
+	#
+
+func find_room_coords(room_num) -> Vector2i:
+	var result : Vector2i = Vector2i.ZERO
+	result.y = room_num % 100
+	result.x = ((room_num - result.y) % 10000) / 100
+	return result
+
+func clear_screens():
+	for c in $MapHolder.get_children():
+		c.queue_free()
+		
+func place_screens():
+	clear_screens()
+	for r in map_display_card.entries.size():
+		var room_pos = map_display_card.entries[r].info[0][1]
+		var room_app = map_display_card.entries[r].info[0][2]
+		var screen : MapScreen = packed_screen.instantiate()
+		screen.screen_name = map_name_card.entries[r + 3].info[0]
+		screen.map_colour = room_app % 10
+		screen.position = find_room_coords(room_pos) * (screen.ROOM_DIMENSIONS + SCREEN_BUFFER)
+		screen.connect(\"hover\", screen_hovered)
+		$MapHolder.add_child(screen)
+
+func screen_hovered(screen_name):
+	$Label.text = screen_name
+"
+
+[node name="FieldMapView" type="Node2D"]
+script = SubResource("GDScript_x5kdw")
+
+[node name="MapHolder" type="Node2D" parent="."]
+
+[node name="Label" type="Label" parent="."]
+offset_left = 138.0
+offset_top = -51.0
+offset_right = 213.0
+offset_bottom = -28.0

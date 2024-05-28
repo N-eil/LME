@@ -30,7 +30,7 @@ func display():
 	var param_desc = Globals.OBJECT_REFERENCE[("0x%02X" % object.object_id)]["parameter_descriptions"]
 	for parameter in object.parameters:
 		var p = parameter_prefab.instantiate()
-		p.get_child(0).text = "Parameter %2d" % (i)
+		p.get_child(0).text = "Parameter %2d" % (i) if param_desc.is_empty() else param_desc[i].left(10)
 		p.get_child(0).tooltip_text = "No details" if param_desc.is_empty() else param_desc[i]
 		p.get_child(0).mouse_filter = MOUSE_FILTER_PASS
 		p.get_child(1).value = parameter

@@ -1,10 +1,14 @@
 extends Node
+var all_fields = []
+var all_screenplay : ScreenplayFull
 
 var all_position_objects = {}
 var all_nonposition_objects = {}
 
-var active_art_tile_index = 0
-var active_collision_tile_index = 1
+
+
+var active_art_tile_index : int = 0
+var active_collision_tile_index : int = 1
 #  "flip_h": false, "rot_90": false, "rot_180": false
 var tile_draw_settings = [false, false, false]
 enum EditType {
@@ -13,7 +17,11 @@ enum EditType {
 	OBJECT,
 	NONE
 }
-var current_edit_type = EditType.ART
+var current_edit_type : EditType = EditType.ART : set = set_edit_type
+
+func set_edit_type(e):
+	current_edit_type = e
+	Messages.emit_signal("edit_type_changed", e)
 
 func set_active_art_tile(i):
 	active_art_tile_index = i
@@ -24,6 +32,9 @@ func set_active_collision_tile(i):
 func make_graphics_filename(f):
 	return "res://GRAPHICS/" + f
 
+
+# Notes and info about objects: (various links)
+# https://discord.com/channels/242731826253266945/334765309904814080/698643338735124521
 const OBJECT_REFERENCE = {
 	"0x00": {
 		"name": "pot",
@@ -194,7 +205,7 @@ const OBJECT_REFERENCE = {
 			"dB",
 			"Max B"
 		],
-		"notes": "        0:Normal\n        1:Fade\n        0:Normal\n        1:Fade\n        2:Large Break\n        3:Crack-Break\n        4:Also Fade\n        5:Go white and vanish in a puff\n        6:Go Black and vanish in a puff\n        7:Go Red and do that streak dealie\n        8:Glow white + rising white pixels\n        9:Break Glass\n\n",
+		"notes": "      0:Normal\n        1:Fade\n        2:Large Break\n        3:Crack-Break\n        4:Also Fade\n        5:Go white and vanish in a puff\n        6:Go Black and vanish in a puff\n        7:Go Red and do that streak dealie\n        8:Glow white + rising white pixels\n        9:Break Glass\n\n",
 		"write_flag_notes": ""
 	},
 	"0x0F": {
@@ -2159,3 +2170,4 @@ const OBJECT_REFERENCE = {
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	Messages.connect("art_cell_selected", set_active_art_tile)
+	Messages.connect("collision_cell_selected", set_active_collision_tile)

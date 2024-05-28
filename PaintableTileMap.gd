@@ -21,7 +21,7 @@ func _on_tilemap_click(event):
 		return
 	do_when_clicked(map_position)
 
-func do_when_clicked(position : Vector2):
+func do_when_clicked(tile_position : Vector2):
 	print("Don't call the base paintable tilemap do_when_clicked. You should override this.")
 
 func _ready():
