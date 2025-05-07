@@ -48,6 +48,13 @@ func add_entry_after(entry_data : ScreenplayEntry, entry_pos : int = entries.siz
 	else:
 		entry_data.info.append(["BREAK"])
 	entries.insert(entry_pos+1, entry_data)
+
+func from_line_array(full_line_array):
+	entries = []
+	for l in full_line_array:
+		entries.append(ScreenplayEntry.from_string(l))
+	size = calc_size()
+
 # A card is made of of multiple entries, which are essentially different "lines" of info
 class ScreenplayEntry:
 	var type : EntryTypes
@@ -56,7 +63,12 @@ class ScreenplayEntry:
 		type = t
 		info = i
 	func _to_string():
-		return "Type %s info %s" % [type, info]
+		return var_to_str([type, info])
+		#return "Type %s info %s" % [type, info]
+
+	static func from_string(s : String):
+		var parsed_string = str_to_var(s)
+		return ScreenplayEntry.new(parsed_string[0], parsed_string[1])
 
 	func calc_size():
 		var calced_size = 0

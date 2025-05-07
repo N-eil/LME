@@ -13,20 +13,31 @@ func setup_card_container():
 	for c in _card_container.get_children():
 		c.queue_free()
 	for e in active_card.entries:
-		for i in e.info:
-			if true:#i is String:
-				var l = LineEdit.new()
-				#l.expand_to_text_length = true
-				l.custom_minimum_size = Vector2i(300, 50)
-				l.text = \"%s\" % [i]
-				_card_container.add_child(l)
+		var l = LineEdit.new()
+		#l.expand_to_text_length = true
+		l.custom_minimum_size = Vector2i(300, 50)
+		l.text = \"%s\" % [e]
+		_card_container.add_child(l)
 	size = Vector2(0,0)
+
 func setup_dropdown():
 	for i in Globals.all_screenplay.cards.size():
 		_options.add_item(\"CARD %s\" % i)
 
 func _on_option_button_item_selected(index):
 	active_card = Globals.all_screenplay.cards[index]
+
+func _on_save_button_pressed():
+	var full_line_array := []
+	for c in _card_container.get_children():
+		full_line_array.append(c.text)
+	
+	active_card.from_line_array(full_line_array)
+	#var editable_entries = _card_container.get_children()
+	#for i in range(len(editable_entries)):
+		#active_card.entries[i] = str_to_var(editable_entries[i].text)
+#
+	print(\"Done saving\")
 "
 
 [node name="ScreenplayEditor" type="PanelContainer"]
@@ -42,7 +53,7 @@ layout_mode = 2
 [node name="OptionButton" type="OptionButton" parent="VSplitContainer/HSplitContainer"]
 layout_mode = 2
 
-[node name="Button" type="Button" parent="VSplitContainer/HSplitContainer"]
+[node name="SaveButton" type="Button" parent="VSplitContainer/HSplitContainer"]
 layout_mode = 2
 text = "Save"
 
@@ -54,3 +65,4 @@ horizontal_scroll_mode = 0
 layout_mode = 2
 
 [connection signal="item_selected" from="VSplitContainer/HSplitContainer/OptionButton" to="." method="_on_option_button_item_selected"]
+[connection signal="pressed" from="VSplitContainer/HSplitContainer/SaveButton" to="." method="_on_save_button_pressed"]
