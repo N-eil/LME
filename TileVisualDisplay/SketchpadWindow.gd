@@ -28,6 +28,7 @@ func set_sketchpad_art_with_backup(new_display : LayerArtPortion):
 	set_sketchpad_art(new_display)
 
 func set_sketchpad_art(new_display : LayerArtPortion):
+	new_display.stored_layer.add_utility_vars()
 	layer_display.generate_from_layer_portion(new_display)
 	layer_display.position = Vector2(64,64)
 
