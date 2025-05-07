@@ -28,12 +28,21 @@ var all_msd = []
 const TILESIZE = 20
 
 #onready var current_directory = OS.get_executable_path().get_base_dir()
-const current_directory = "C:/Users/Neil/Documents/godot/Godot_v4.0-stable_win64.exe/la mulana/la mulana editor/LME/"
-var msd_directory = current_directory.path_join("MSD")
-var graphics_directory = current_directory.path_join("GRAPHICS")
+
+#const current_directory = "C:/Users/Neil/Documents/godot/Godot_v4.0-stable_win64.exe/la mulana/la mulana editor/LME/"
+#var msd_directory = current_directory.path_join("MSD")
+#var graphics_directory = current_directory.path_join("GRAPHICS")
+#var rcd_directory = current_directory
+#var screenplay_directory = current_directory
+
+var msd_directory 
+var graphics_directory 
+var rcd_directory 
+var screenplay_directory
+
 
 func load_screenplay(path):
-	path = current_directory.path_join("script_code.dat")
+	path = screenplay_directory.path_join("script_code.dat")
 	var loaded_buffer = StreamPeerBuffer.new()
 	var screenplay_file = FileAccess.open(path, FileAccess.READ)
 	var temp_buffer = screenplay_file.get_buffer(screenplay_file.get_length())
@@ -46,8 +55,7 @@ func load_screenplay(path):
 
 func load_rcd():
 	loaded_rsd_buffer = StreamPeerBuffer.new()
-	var rsd_file = FileAccess.open(current_directory.path_join("originalscript.rcd"), FileAccess.READ)
-	print(current_directory.path_join("originalscript.rcd"))
+	var rsd_file = FileAccess.open(rcd_directory.path_join("script.rcd"), FileAccess.READ)
 	var temp_buffer = rsd_file.get_buffer(rsd_file.get_length())
 #    print(temp_buffer.size())   
 	loaded_rsd_buffer.put_data(temp_buffer)
@@ -86,8 +94,9 @@ var current_room_id
 var current_screen_id
 
 func show_fieldmap(field_num):
-	$FieldMapView.map_name_card = Globals.all_screenplay.cards[Globals.all_screenplay.map_name_cards[field_num]]
-	$FieldMapView.map_display_card = Globals.all_screenplay.cards[Globals.all_screenplay.map_display_cards[field_num]]
+	var field_info = EditFriendlyField.new(Globals.all_fields[field_num], Globals.all_screenplay.cards[Globals.all_screenplay.map_name_cards[field_num]], Globals.all_screenplay.cards[Globals.all_screenplay.map_display_cards[field_num]])
+	$FieldMapView.screen_list_info = field_info
+	$FieldMapView.place_screens()
 
 
 func convert_tile_coord_to_data(layer : Layer):
@@ -103,18 +112,18 @@ func screen_exists(z, r = 0, s = 0):
 	return true    
 	
 func _on_screen_selected(index):
+
 	Messages.emit_signal("new_art_palette", Globals.make_graphics_filename(current_msd_file.graphics_filename))
 	#display_screen($RoomCanvas/Visuals, current_zone_id, current_room_id, index)
 	$LayerCompositeDisplay.generate_from_msd(current_msd_file, current_room_id, index)
 	$CollisionTilemap.from_msd_room(current_msd_file.rooms[current_room_id], index)
-	$CollisionTilemap.position = $LayerCompositeDisplay.position
 	#$LayerPortionDisplay.display_portion()
 	display_objects_in_screen($RoomCanvas/Objects, current_zone_id, current_room_id, index)
 
 func show_object_edit_menu(o):
 	$EditType.current_tab = 2
 	$EditType/Objects.object = o
-	$EditType/Objects.display()
+	$EditType/Objects.display(o)
 	$EditType.size = Vector2(300,0)
 	$EditType/Objects.visible = false
 	$EditType/Objects.call_deferred("set_visible", true)
@@ -153,8 +162,7 @@ func display_room(zone_id, room_id):
 	current_room_id = room_id
 	# Uncomment this line to load msd from game directory (loads the ones you previouslly saved instead of fresh ones)
 	# CHANGE MSD LOADING HERE
-	var msd_directory = "C:/Program Files (x86)/Steam/steamapps/common/La-Mulana/data/mapdata"  
-		
+
 	var msd
 	if (zone_id == current_zone_id):
 		msd = current_msd_file
@@ -163,6 +171,7 @@ func display_room(zone_id, room_id):
 		msd = load_msd(msd_directory.path_join("map" + ("%02d" % zone_id) + ".msd"), zone_id)
 		current_msd_file = msd
 		show_fieldmap(zone_id)
+		Globals.active_msd = current_msd_file
 
 	$Node2D/RoomJump/HBoxContainer3/ScreenSelector.clear()
 	for i in range(current_msd_file.rooms[room_id].screen_count):
@@ -173,11 +182,16 @@ func display_room(zone_id, room_id):
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
+	# Set up global window references
+	Globals.sketchpad_window = $SketchpadWindow
+	Globals.collisionpad_window = $CollisionpadWindow
+
+func begin_loading():
 	load_rcd() #TODO: read the RCD again
 	load_screenplay("ignore this")
 	
 	for i in range(26):
-		var f = RcdStructs.Field.new(i)
+		var f = Field.new(i)
 		var msd = load_msd(msd_directory.path_join("map" + ("%02d" % i) + ".msd"), i, true)
 		f.read(loaded_rsd_buffer, msd)
 		Globals.all_fields.append(f)
@@ -186,7 +200,7 @@ func _ready():
 #        all_msd.append(msd)
 #        display_room($RoomCanvas/TileMap, all_msd[0], 0, 0, 0)
 	print("READING DONE")    
-	
+	$ScreenplayEditor.setup_dropdown()
 	# Print the info about all objects, mostly for debugging
 #	var posfile = FileAccess.open("allpositionobjects.json", FileAccess.WRITE)
 #	posfile.store_string(JSON.stringify(Globals.all_position_objects, "  "))
@@ -194,7 +208,7 @@ func _ready():
 #	nonposfile.store_string(JSON.stringify(Globals.all_nonposition_objects, "  "))
 	
 	
-	display_room(1, 1)
+	display_room(1, 2)
 #    var temp_storage_file = File.new()
 #    temp_storage_file.open("res://tempstore.json", File.WRITE)
 #    temp_storage_file.store_string(JSON.stringify(all_fields, "  "))
@@ -205,37 +219,56 @@ func _ready():
 #func _process(delta):
 #    pass
 
-func _on_Button_pressed():
+func _on_Button_pressed(game : bool):
 	# TODO: deep clone instead of reference
 #    all_fields[0].rooms[1].screens[1].exits[1].screen_id = 2
 #    all_fields[0].rooms[1].screens.append(all_fields[0].rooms[1].screens[1])
 #    all_fields[0].rooms[1].screens[2].exits[1].screen_id = 0
 #    all_fields[0].rooms[1].screens[2].exits[1].room_id = 2
-	$Node2D/RoomJump/Write.text = "Saving..."
+	#$Node2D/RoomJump/Write.text = "Saving..."
+
+	if game:
+		set_workspace("C:/Program Files (x86)/Steam/steamapps/common/La-Mulana/data")
+	else:
+		set_workspace("")
 
 	save_msd_changes()
 	save_rcd_changes()
-	$Node2D/RoomJump/Write.text = "Write to file"
-	
-	
+	save_screenplay_changes()
+	#$Node2D/RoomJump/Write.text = "Write to file"
+
+func save_screenplay_changes():
+	var output_buffer = StreamPeerBuffer.new()
+	output_buffer.big_endian = true
+	output_buffer.seek(0)
+	Globals.all_screenplay.write(output_buffer)
+
+	var path = screenplay_directory.path_join("script_code.dat")
+
+	var written_screenplay = FileAccess.open(path, FileAccess.WRITE)
+	written_screenplay.store_buffer(output_buffer.data_array)
+	written_screenplay.close()
+
+	print("Screenplay written!")
+
 func save_msd_changes():
 	var output_buffer = StreamPeerBuffer.new()
 	output_buffer.big_endian = true
 	output_buffer.seek(0)
 	current_msd_file.write(output_buffer)
 
-	var game_current_directory = "C:/Program Files (x86)/Steam/steamapps/common/La-Mulana/data/mapdata"
-	var written_msd = FileAccess.open(game_current_directory.path_join("map" + ("%02d" % current_zone_id) + ".msd"), FileAccess.WRITE)
+	var written_msd = FileAccess.open(msd_directory.path_join("map" + ("%02d" % current_zone_id) + ".msd"), FileAccess.WRITE)
 	written_msd.store_buffer(output_buffer.data_array)
 	written_msd.close()
 
 	print("MSD written!")
+	
+	#Some sort of backup?
 	current_msd_file.rooms[current_room_id].write_to_file()
 
 func save_rcd_changes():
-	var game_current_directory = "C:/Program Files (x86)/Steam/steamapps/common/La-Mulana/data/mapdata"
-	var write_file = FileAccess.open(game_current_directory.path_join("script.rcd"), FileAccess.WRITE)    
-	
+	var write_file = FileAccess.open(rcd_directory.path_join("script.rcd"), FileAccess.WRITE)    
+
 	var output_buffer = StreamPeerBuffer.new()
 	output_buffer.big_endian = true
 	output_buffer.seek(0)
@@ -290,16 +323,17 @@ func add_position_object(position, new_o):
 	Globals.all_fields[current_zone_id].rooms[current_room_id].screens[current_screen_id].add_pos_object(new_o)
 
 func _on_add_new_room_pressed():
-	current_msd_file.rooms[current_room_id].add_screen(current_screen_id)
-	Globals.all_fields[current_zone_id].rooms[current_room_id].add_screen(current_zone_id)
-
-	$Node2D/RoomJump/HBoxContainer3/ScreenSelector.clear()
-	for i in range(current_msd_file.rooms[current_room_id].screen_count):
-		$Node2D/RoomJump/HBoxContainer3/ScreenSelector.add_item(str(i))
-	
-	current_screen_id = -1
-	#display_screen($RoomCanvas/Visuals, current_zone_id, current_room_id, 0)
-	_on_screen_selected(Globals.all_fields[current_zone_id].rooms[current_room_id].screen_count -1)
+	pass
+	#current_msd_file.rooms[current_room_id].add_screen(current_screen_id)
+	#Globals.all_fields[current_zone_id].rooms[current_room_id].add_screen(current_zone_id)
+#
+	#$Node2D/RoomJump/HBoxContainer3/ScreenSelector.clear()
+	#for i in range(current_msd_file.rooms[current_room_id].screen_count):
+		#$Node2D/RoomJump/HBoxContainer3/ScreenSelector.add_item(str(i))
+	#
+	#current_screen_id = -1
+	##display_screen($RoomCanvas/Visuals, current_zone_id, current_room_id, 0)
+	#_on_screen_selected(Globals.all_fields[current_zone_id].rooms[current_room_id].screen_count -1)
 
 
 func _on_LayerTree_button_pressed(item, column, id):
@@ -312,12 +346,33 @@ func _on_edit_type_selected(index):
 			Globals.current_edit_type = Globals.EditType.NONE
 		1:
 			Globals.current_edit_type = Globals.EditType.ART
-			$LayerCompositeDisplay/EditType.visible = true
+			$SublayerSelector.visible = true
 		2:
-			printerr("Unimplemented edit type")
+			Globals.current_edit_type = Globals.EditType.ART_COPY
 		3:
 			Globals.current_edit_type = Globals.EditType.COLLISION
-			$LayerCompositeDisplay/EditType.visible = false
+			$SublayerSelector.visible = false
 		4:
 			Globals.current_edit_type = Globals.EditType.OBJECT
-			$LayerCompositeDisplay/EditType.visible = false
+			$SublayerSelector.visible = false
+
+
+func set_workspace(path : String):
+	if path.is_empty():
+		path = "C:/Users/Neil/Documents/godot/Godot_v4.0-stable_win64.exe/la mulana/la mulana editor/LME/LMdata"
+
+	msd_directory = path.path_join("mapdata")
+	graphics_directory = path.path_join("graphics/00")
+	rcd_directory = path.path_join("mapdata")
+	screenplay_directory = path.path_join("/language/en")
+
+
+func _on_local_pressed():
+	set_workspace("C:/Users/Neil/Documents/godot/Godot_v4.0-stable_win64.exe/la mulana/la mulana editor/LME/LMdata")
+	$DirectoryButtons.queue_free()
+	begin_loading()
+
+func _on_game_pressed():
+	set_workspace("C:/Program Files (x86)/Steam/steamapps/common/La-Mulana/data")
+	$DirectoryButtons.queue_free()
+	begin_loading()

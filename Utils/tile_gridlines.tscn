@@ -2,9 +2,18 @@
 
 [sub_resource type="GDScript" id="GDScript_763k5"]
 script/source = "extends Node2D
-@export var TILESIZE = 20
-@export var width = 32
-@export var height = 24
+@export var TILESIZE = 20 : 
+	set(value):
+		TILESIZE = value
+		queue_redraw()
+@export var width = 32 :
+	set(value):
+		width = value
+		queue_redraw()
+@export var height = 24 :
+	set(value):
+		height = value
+		queue_redraw()
 
 func _draw():
 	for col in width + 1:

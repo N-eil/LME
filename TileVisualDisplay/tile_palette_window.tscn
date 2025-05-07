@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://c2qy35xddt57r"]
 
-[ext_resource type="Texture2D" uid="uid://wnwxnoatiitf" path="res://GRAPHICS/map00_1.png" id="1_rdx8v"]
+[ext_resource type="Texture2D" uid="uid://c31vth728ntg7" path="res://GRAPHICS/map00_1.png" id="1_rdx8v"]
 [ext_resource type="PackedScene" uid="uid://2k3gf6fn4vsc" path="res://Utils/palette_click_checker.tscn" id="2_sybpb"]
 
 [sub_resource type="GDScript" id="GDScript_2v2bk"]
@@ -23,7 +23,7 @@ func _on_check_box_toggled(toggled_on, extra_arg_0):
 	Globals.tile_draw_settings[extra_arg_0] = toggled_on
 
 func _on_edit_type_changed(e):
-	get_parent().visible = (e == Globals.EditType.ART)
+	get_parent().visible = (e == Globals.EditType.ART || e == Globals.EditType.ART_COPY)
 "
 
 [node name="TilePaletteWindow" type="Window"]

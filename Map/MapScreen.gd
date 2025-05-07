@@ -4,23 +4,31 @@ class_name MapScreen
 enum MapColours {INVISIBLE, WHITE, GREEN, YELLOW, RED, BLUE, TRANSPARENT}
 const map_colour_array : Array[Color] = ["#00000000", Color.WHITE, Color.LIGHT_GREEN, Color.PALE_GOLDENROD, Color.INDIAN_RED, Color.AQUA, "#00000000"]
 
-enum MapIcons {BLANK, BACKSIDE, GRAIL, CROSS, FAIRY, BROWNDOOR, BLUEDOOR, PHILOSOPHER, UP, DOWN, LEFT, RIGHT, BONE}
-
 signal hover (n)
+signal click (n)
 
 const ROOM_DIMENSIONS = Vector2i(45, 30)
 
 @export var screen_name : String = "Error missing name"
-@export var map_position : Vector2
+@export var internal_pos : Vector3i : 
+	set (c):
+		internal_pos = c
+		$Label.text = "%s   %s" % [c.y, c.z]
 @export var map_colour : MapColours :
 	set (c):
 		map_colour = c
 		queue_redraw()
-@export var first_icon : MapIcons
-@export var second_icon : MapIcons
+@export var first_icon : ScreenplayCard.MapIcons :
+	set(c):
+		first_icon = c
+		$FirstIcon.frame = c
+@export var second_icon : ScreenplayCard.MapIcons :
+	set(c):
+		second_icon = c
+		$SecondIcon.frame = c
 
-var internal_location : Array 
-
+var internal_position : Vector2i 
+var index : int
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
@@ -40,3 +48,8 @@ func _on_mouse_entered():
 
 func _on_mouse_exited():
 	self.modulate = Color.WHITE
+
+func _on_input_event(viewport, event, shape_idx):
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+			click.emit(index)

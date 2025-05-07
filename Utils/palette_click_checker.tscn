@@ -15,7 +15,6 @@ func _on_input_event(viewport, event, shape_idx):
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			active_cell.x = floor((event.position.x - global_position.x) / TILESIZE)
 			active_cell.y = floor((event.position.y - global_position.y) / TILESIZE)
-			print(active_cell)
 			queue_redraw() 
 			emit_signal(\"cell_selected\", active_cell.x + active_cell.y * WIDTH)
 "

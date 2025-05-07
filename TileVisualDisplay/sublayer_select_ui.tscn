@@ -1,0 +1,30 @@
+[gd_scene load_steps=2 format=3 uid="uid://dkcuccdnawbde"]
+
+[ext_resource type="Script" path="res://TileVisualDisplay/SublayerSelectUI.gd" id="1_5qah5"]
+
+[node name="SublayerSelectUI" type="Control"]
+custom_minimum_size = Vector2(1000, 700)
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1000.0
+offset_bottom = 700.0
+size_flags_vertical = 3
+mouse_filter = 1
+script = ExtResource("1_5qah5")
+
+[node name="LayerTree" type="Tree" parent="."]
+custom_minimum_size = Vector2(400, 300)
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 710.0
+offset_top = 300.0
+offset_right = 110.0
+offset_bottom = -100.0
+grow_horizontal = 0
+grow_vertical = 2
+columns = 2
+
+[connection signal="item_edited" from="LayerTree" to="." method="_on_layer_tree_item_edited"]
+[connection signal="item_selected" from="LayerTree" to="." method="_on_layer_tree_item_selected"]

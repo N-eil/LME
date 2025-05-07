@@ -9,17 +9,16 @@ class_name LayerArtPortion
 @export var layer_count : int = 1
 const TILESIZE = 20
 
-var stored_layer : Layer
+@export var stored_layer : Layer
 
-func _init(p_width = 0, p_height = 0, layer_info = null):
+func _init(p_width = 0, p_height = 0, layer_info : Layer = null):
 	height = p_height
 	width  = p_width
 	if layer_info == null or !(layer_info is Layer):
 		stored_layer = Layer.new()
 		stored_layer.layer_height = height
 		stored_layer.layer_width = width
-		var n_slayer = Sublayer.create_empty(width, height)
-		stored_layer.add_sublayer(n_slayer)
+		add_empty_sublayer()
 	else:
 		stored_layer = layer_info
 	#for i in range(height):
@@ -28,15 +27,37 @@ func _init(p_width = 0, p_height = 0, layer_info = null):
 		#for j in range(width):
 			#t_row.append(MsdStructs.Tile.new)
 
-func set_tile(x,y,t: Sublayer.Tile, sublayer=0):
+func add_empty_sublayer():
+	var n_slayer = Sublayer.create_empty(width, height)
+	stored_layer.add_sublayer(n_slayer)
+
+func copy_portion(top_left : Vector2i = Vector2i.ZERO, size : Vector2i = Vector2i(10,10)):
+	var new_portion = LayerArtPortion.new()
+	new_portion.tilesheet_filename = tilesheet_filename
+	new_portion.width = size.x
+	new_portion.height = size.y
+	new_portion.layer_count = layer_count
+	new_portion.stored_layer = stored_layer.copy_layer_portion(top_left, size)
+	return new_portion
+
+#Sets a tile at a coordinate to a specified tile, all info inclded
+func set_tile(x,y,t: Tile, sublayer=0):
 	if x >= width or y >= height:
 		print("Setting an art portion tile outside bounds")
 		return
 	stored_layer.sublayers[sublayer].tiles[y][x] = t
 
-func set_tile_coords(x,y,t : int,sublayer=0, flips = [false, false, false]):
+func clear_tile(x :int, y : int,sublayer : int):
 	if x >= width or y >= height:
-		print("Setting an art portion tile coords outside bounds")
+		printerr("Setting an art portion tile coords outside bounds")
+		return
+
+	stored_layer.sublayers[sublayer].tiles[y][x].type = 0
+
+#Sets a tile at a coordinate to use a specific position in the art atlas and specify how it should be flipped
+func set_tile_art(x,y,t : int,sublayer=0, flips = [false, false, false]):
+	if x >= width or y >= height:
+		printerr("Setting an art portion tile coords outside bounds")
 		return
 	stored_layer.sublayers[sublayer].tiles[y][x].coords = t
 	stored_layer.sublayers[sublayer].tiles[y][x].flipped_horizontally = flips[0]

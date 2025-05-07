@@ -4,30 +4,72 @@ class_name LayerPortionDisplay
 @export var to_display : LayerArtPortion
 @onready var layer_prefab = load("res://MSDLayer.tscn")
 
-var mult_canvas = CanvasItemMaterial.new()
-var add_canvas = CanvasItemMaterial.new()
+
 var active_tileset : TileSet
 var top_left_offset : Vector2 = Vector2.ZERO
 
-func _ready():
-	add_canvas.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
-	mult_canvas.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
+func cell_clicked(l, pos : Vector2i, e : InputEventMouse):
+	if Globals.current_edit_type != Globals.EditType.ART:
+		return
 
-func cell_clicked(l, pos):
-	if Globals.current_edit_type == Globals.EditType.ART:
-		update_single_cell(l, pos.x, pos.y)
+	# When holding ctrl, first click is top left, 2nd click is bottom right of copy box
+	if e.ctrl_pressed:
+		if Globals.copy_top_left == Vector2i(-1,-1):
+			Globals.copy_top_left = pos
+		else:
+			var w : Node = Globals.sketchpad_window
+			w.set_sketchpad_art_with_backup(to_display.copy_portion(Globals.copy_top_left, pos - Globals.copy_top_left + Vector2i(1,1)))
+			Globals.copy_top_left = Vector2i(-1,-1)
+		return
+
+	# When holding alt, paste the sketchpad's top left at the clicked cell
+	if e.alt_pressed:
+		var w : Node = Globals.sketchpad_window
+		var source_layer : Layer = w.convert_to_layer_data().stored_layer
+		to_display.stored_layer.replace_layer_portion(pos, source_layer)
+		update_all_cells_onscreen()
+		return
+
+
+	# Right click is the erase button
+	if e.button_mask == MOUSE_BUTTON_RIGHT:
+		to_display.clear_tile(pos.x, pos.y, l.get_index())
+		l.erase_cell(1, pos)
+		return
+
+	# Basic left click without modifiers just draws normally
+	update_single_cell_in_data(l, pos.x, pos.y)
+
+#	elif Globals.current_edit_type == Globals.EditType.ART_COPY: #TODO: Make a script on the sketchpad window instead of directly calling child scripts 
+#		var w : Node = Globals.sketchpad_window
+#		w.set_sketchpad_art_with_backup(to_display.copy_portion(pos))
+		#w.get_child(0).active_tileset = active_tileset
+		#w.get_child(0).display_portion()
 
 func clear_display():
 	for c in get_children():
-		c.queue_free()
+		c.free()
 
-func update_single_cell(sublayer, x, y):
+# Updates a single cell in the underlying Sublayer data structure, then updates on screen
+func update_single_cell_in_data(sublayer, x, y):
 	var sublayer_index = sublayer.get_index()
-	to_display.set_tile_coords(x, y, Globals.active_art_tile_index, sublayer_index, Globals.tile_draw_settings)
-	var tile = to_display.stored_layer.sublayers[sublayer_index].tiles[top_left_offset.y + y][top_left_offset.x + x]
-	set_single_cell_with_flips(get_child(sublayer_index), Vector2i(x,y), Vector2i(tile.coords%50, floor(tile.coords/50)), Globals.tile_draw_settings)
+	to_display.set_tile_art(x, y, Globals.active_art_tile_index, sublayer_index, Globals.tile_draw_settings)
+	update_single_cell_onscreen(sublayer_index, x, y)
 
-func set_single_cell_with_flips(tilemap, screen_pos, atlas_pos, flip_flags):
+# Updates a single cell onscreen without changing the underlying data. Use when changing the sublayer or to fix desyncs.
+func update_single_cell_onscreen(sublayer_index:int, x:int, y :int):
+	var tile : Tile = to_display.stored_layer.sublayers[sublayer_index].tiles[top_left_offset.y + y][top_left_offset.x + x]
+	if tile.type != 0:
+		set_single_cell_with_flips(get_child(sublayer_index), Vector2i(x,y), Vector2i(tile.coords%50, floor(tile.coords/50)), tile.make_art_flip_flags())
+		set_tilemap_blending(get_child(sublayer_index), tile)
+
+func update_all_cells_onscreen():
+	for s in range(to_display.stored_layer.sublayer_count):
+		for x in range(32):
+			for y in range(24):
+				update_single_cell_onscreen(s, x, y)
+
+func set_single_cell_with_flips(tilemap : TileMap, screen_pos, atlas_pos, flip_flags):
 	var alt_tile_id = 0
 	if true in flip_flags:
 		var t_source =  tilemap.tile_set.get_source(0) as TileSetAtlasSource
@@ -37,6 +79,14 @@ func set_single_cell_with_flips(tilemap, screen_pos, atlas_pos, flip_flags):
 	t.flip_h = flip_flags[0]
 	t.flip_v = flip_flags[1]
 	t.transpose = flip_flags[2]
+
+#In theory, each cell can have its own blending.
+#In practice, all tiles on a sublayer share a blend mode so it is safe to set the entire thing off one tile 
+func set_tilemap_blending(tilemap :TileMap, tile : Tile):
+	if tile.type == 2:
+		tilemap.material = Globals.add_canvas
+	if tile.type == 3:
+		tilemap.material = Globals.mult_canvas 
 
 func display_portion(tilesize = to_display.TILESIZE):
 	if not active_tileset: #TODO: call this whenever tileset changes in file
@@ -49,15 +99,17 @@ func display_portion(tilesize = to_display.TILESIZE):
 #        var layer = room.layers[room.prime_layer_index - 1]  ONLY SHOW PRIME LAYER
 #        $RoomCanvas/TileMap.cell_size = Vector2(TILESIZE/2, TILESIZE/2)
 #        var index = 0
-#        for h in room.hit_mask:
+#        for h in room.hitmask:
 #            if h:
-#                tilemap.set_cell(index % room.hit_mask_width, floor(index / room.hit_mask_width), 0)
+#                tilemap.set_cell(index % room.hitmask_width, floor(index / room.hitmask_width), 0)
 #            index += 1    
 #        for s in range(layer.sublayers.size() -1, -1,-1):  REVERSE SUBLAYER ORDER
 #            var sublayer = layer.sublayers[s]
 	var sublayer_z = -1
 
-
+	#print("Sublayer count " + str(layer.sublayer_count))
+	#print("Sublayer actual count " + str(len(layer.sublayers)))
+	#print("Children count " + str(get_child_count()))
 	for sublayer in layer.sublayers:
 		var tilemap : TileMap = layer_prefab.instantiate()
 		tilemap.cell_quadrant_size = to_display.TILESIZE
@@ -76,21 +128,14 @@ func display_portion(tilesize = to_display.TILESIZE):
 		var i = 0
 		while i < 24:
 			if (i >= layer.layer_height):
+				tilemap.dimensions.y = layer.layer_height
 				break
 			var j = 0
 			while  j < 32:
 				if (j >= layer.layer_width):
-					break 
-				var flip_flags = [false, false, false]                  
-				var tile : Sublayer.Tile = sublayer.tiles[top_left_offset.y + i][top_left_offset.x + j]
-				if tile.flipped_horizontally:
-					flip_flags[0] = !flip_flags[0]
-				if tile.rotated_90:
-					flip_flags[0] = !flip_flags[0]    
-					flip_flags[2] = !flip_flags[2]
-				if tile.rotated_180:
-					flip_flags[0] = !flip_flags[0]
-					flip_flags[1] = !flip_flags[1]                    
+					tilemap.dimensions.x = layer.layer_width
+					break
+				var tile : Tile = sublayer.tiles[top_left_offset.y + i][top_left_offset.x + j]                  
 				if tile.type != 0:
 					# Use TileSetAtlasSource.create_alternative_tile to make alternatives for flipped tiles.
 					# Only create flips of the ones that are actually flipped ingame
@@ -99,13 +144,10 @@ func display_portion(tilesize = to_display.TILESIZE):
 #						if (current_msd_file.animated_tiles_map.has(tile.coords)):
 #							print("animated tile")
 #						else:
-					set_single_cell_with_flips(tilemap, Vector2i(j, i), Vector2i(tile.coords%50, floor(tile.coords/50)), flip_flags)
+					set_single_cell_with_flips(tilemap, Vector2i(j, i), Vector2i(tile.coords%50, floor(tile.coords/50)), tile.make_art_flip_flags())
 					if (!blend_set):
 						blend_set = true
-						if tile.type == 2:
-							tilemap.material = add_canvas
-						if tile.type == 3:
-							tilemap.material = mult_canvas             
+						set_tilemap_blending(tilemap, tile)            
 				j += 1
 			i += 1
 		sublayer_z = sublayer_z - 1

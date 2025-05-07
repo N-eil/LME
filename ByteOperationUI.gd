@@ -1,19 +1,19 @@
 extends HBoxContainer
 
-class TestFlag:  # TODO: find some way to store the class centrally?
-	var flag : int
-	var value : int
-	var operation : int
-	
-	func read(data : StreamPeerBuffer):
-		flag = data.get_16()
-		value = data.get_8()    
-		operation  = data.get_8()
-	
-	func write(buf : StreamPeerBuffer):
-		buf.put_16(flag)
-		buf.put_8(value)
-		buf.put_8(operation)
+#class TestFlag:  # TODO: find some way to store the class centrally?
+	#var flag : int
+	#var value : int
+	#var operation : int
+	#
+	#func read(data : StreamPeerBuffer):
+		#flag = data.get_16()
+		#value = data.get_8()    
+		#operation  = data.get_8()
+	#
+	#func write(buf : StreamPeerBuffer):
+		#buf.put_16(flag)
+		#buf.put_8(value)
+		#buf.put_8(operation)
 
 
 const TEST_OPERATIONS = [
@@ -23,13 +23,13 @@ const TEST_OPERATIONS = [
 	"Bitwise AND nonzero",
 	"Bitwise OR nonzero",
 	"Bitwise XOR nonzero",
-#	"Flag is zero",
+	"Always True",
 	"Not equal",
 	"Greater than",
 	"Less than",
 	"Bitwise AND zero",
 	"Bitwise OR zero",
-#	"Bitwise XOR zero",
+	"Always True",
 	"Flag is nonzero"
 ]
 	

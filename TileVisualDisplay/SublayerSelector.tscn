@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3 uid="uid://7cl5kojqt4rn"]
+
+[ext_resource type="Script" path="res://TileVisualDisplay/SublayerSelectUI.gd" id="1_al7n7"]
+
+[node name="SublayerSelector" type="Tree"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -400.0
+offset_top = -300.0
+grow_horizontal = 0
+grow_vertical = 0
+columns = 2
+script = ExtResource("1_al7n7")
+
+[connection signal="item_edited" from="." to="." method="_on_item_edited"]
+[connection signal="item_selected" from="." to="." method="_on_item_selected"]

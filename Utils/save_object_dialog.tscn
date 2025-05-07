@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://dmarwfkn1e40n"]
+
+[node name="SaveObjectDialog" type="FileDialog"]
+size = Vector2i(800, 600)
+ok_button_text = "Save"
+access = 1
+filters = PackedStringArray("*.tres ; RCD Objects")

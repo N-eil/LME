@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://b2qch4l1id7es"]
+
+[ext_resource type="Script" path="res://TileVisualDisplay/TileSetLoader.gd" id="1_i4btt"]
+
+[node name="TileSetLoader" type="Node2D"]
+script = ExtResource("1_i4btt")

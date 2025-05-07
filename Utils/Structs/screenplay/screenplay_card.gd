@@ -4,8 +4,16 @@ enum EntryTypes {DATA, FLAG, ITEM, POSE, MANTRA, MISC}
 var size : int
 var entries : Array = []
 
+enum MapIcons {BLANK, BACKSIDE, GRAIL, CROSS, FAIRY, BROWNDOOR, BLUEDOOR, PHILOSOPHER, UP, DOWN, LEFT, RIGHT, BONE}
+
+static func icon_vec_to_num(vec : Vector3i):
+	return 1000 * vec.x + 10 * vec.y + vec.z
+	
+static func icon_num_to_vec(num : int):
+	return Vector3i(floori(num / 1000), floori((num % 1000) / 10), num % 10)
+
 static var screenplay_font : String = \
-		"!\"&'(),-./0123456789:?ABCDEFGHIJKLMNOPQRSTUVWXYZ\
+	"!\"&'(),-./0123456789:?ABCDEFGHIJKLMNOPQRSTUVWXYZ\
 　]^_abcdefghijklmnopqrstuvwxyz…♪、。々「」ぁあぃいぅうぇえぉおか\
 がきぎくぐけげこごさざしじすずせぜそぞただちぢっつづてでとどなにぬねのはばぱひびぴふぶぷへべぺほ\
 ぼぽまみむめもゃやゅゆょよらりるれろわをんァアィイゥウェエォオカガキギクグケゲコゴサザシジスズセ\
@@ -32,12 +40,21 @@ static var screenplay_font : String = \
 幽技師柄期瞬電購任販Á;û+→↓←↑⓪①②③④⑤⑥⑦⑧⑨<”挑朝痛魅鍛戒飲憂照磨射互降沈醜触煮疲\
 素競際易堅豪屈潔削除替Ü♡*$街極"
 
+static var reverse_font = {}
+
+func add_entry_after(entry_data : ScreenplayEntry, entry_pos : int = entries.size()):
+	if entry_pos >= entries.size(): #Adding at the end, so the previous entry needs a BREAK but this one does not
+		entries[entries.size() - 1].info.append(["BREAK"])
+	else:
+		entry_data.info.append(["BREAK"])
+	entries.insert(entry_pos+1, entry_data)
 # A card is made of of multiple entries, which are essentially different "lines" of info
 class ScreenplayEntry:
-	var type : EntryTypes 
+	var type : EntryTypes
 	var info : Array  = []
-	func _init(t : EntryTypes = EntryTypes.MISC):
+	func _init(t : EntryTypes = EntryTypes.MISC, i : Array = []):
 		type = t
+		info = i
 	func _to_string():
 		return "Type %s info %s" % [type, info]
 
@@ -54,22 +71,28 @@ class ScreenplayEntry:
 			calced_size += 1
 		return calced_size
 
-	func read_entry(card_data: Array): #Reads until finding the 0x00A0, which is the divider for entries  
+	func read_entry(card_data: Array): #Reads until finding the 0x00A0, which is the divider for entries
 		var s = ""
 		while true:
 			var b = card_data.pop_front()
-			if b == 0x000A or b == null:
+			if b == null:
 				if not s.is_empty():
 					info.append(s)
 					s = ""
 				return
 
 			# Things that are not strings, special commands. Reset the stored string
+			elif b == 0x000A:
+				if not s.is_empty():
+					info.append(s)
+					s = ""
+				info.append(["BREAK"])
+				return
 			elif b >= 0x0040 and b < 0x0050:
 				if not s.is_empty():
 					info.append(s)
 					s = ""
-				if b == 0x0040: 
+				if b == 0x0040:
 					info.append(["Flag", card_data.pop_front(), card_data.pop_front()])
 				elif b == 0x0042:
 					info.append(["Item", card_data.pop_front()])
@@ -77,7 +100,7 @@ class ScreenplayEntry:
 					info.append(["Clear"])
 				elif b == 0x0045:
 					info.append(["Newline"])
-				elif b == 0x0046: 
+				elif b == 0x0046:
 					info.append(["Pose", card_data.pop_front()])
 				elif b == 0x0047:
 					info.append(["Mantra", card_data.pop_front()])
@@ -95,7 +118,7 @@ class ScreenplayEntry:
 
 			# Things that are part of strings
 			elif b == 0x000C:
-				s += "✧" 
+				s += "✧"
 			elif b == 0x0020:
 				s += " "
 			elif b == 0x05c1:
@@ -109,28 +132,96 @@ class ScreenplayEntry:
 			else:
 				printerr("Found an unrecognized entry type %s" % b)
 
+	func write(buf : StreamPeerBuffer):
+		if info.size() == 0:
+			buf.put_16(0x000A)
+			return
+		for part in info:
+			if part is String:
+				for letter in part:
+					if letter == "✧":
+						buf.put_16(0x000C)
+					elif letter == " ":
+						buf.put_16(0x0020)
+					elif letter == "★":
+						buf.put_16(0x05c1)
+					elif letter == "☆":
+						buf.put_16(0x05c2)
+					elif letter == "✦":
+						buf.put_16(0x05c3)
+					else:
+						buf.put_16(ScreenplayCard.reverse_font[letter] + 0x0100)
+			elif part is Array:
+				if part[0] == "BREAK":
+					buf.put_16(0x000A)
+				if part[0] == "Flag":
+					buf.put_16(0x0040)
+					buf.put_16(part[1])
+					buf.put_16(part[2])
+				elif part[0] == "Item":
+					buf.put_16(0x0042)
+					buf.put_16(part[1])
+				elif part[0] == "Clear":
+					buf.put_16(0x0044)
+				elif part[0] == "Newline":
+					buf.put_16(0x0045)
+				elif part[0] == "Pose":
+					buf.put_16(0x0046)
+					buf.put_16(part[1])
+				elif part[0] == "Mantra":
+					buf.put_16(0x0047)
+					buf.put_16(part[1])
+				elif part[0] == "Colour":
+					buf.put_16(0x004a)
+					buf.put_16(part[1])
+					buf.put_16(part[2])
+					buf.put_16(part[3])
+				elif part[0] == "Anime":
+					buf.put_16(0x004F)
+					buf.put_16(part[1])
+				elif part[0] == "Data":
+					buf.put_16(0x004E)
+					var a = part.slice(1)
+					buf.put_16(a.size())
+					for d in a:
+						buf.put_16(d)
+			else:
+				printerr("Writing an invalid screenplay entry")
+
 func calc_size():
 	var calced_size = 0
 	for e in entries:
 		calced_size += e.calc_size()
-	calced_size += entries.size() - 1 #The final entry does not have a break
+	#calced_size += entries.size() - 1 #The final entry does not have a break
 	return calced_size * 2 # Each read in the file is actually two bytes
 
 func _to_string():
 	var result : String = "Size: %s\n" % size
+	result += "Calced size: %s \n" % calc_size()
+	result += "Entry count: %s \n" % entries.size()
 	for e in entries:
 		result += "%s \n" % e
 	return result
 
 func decode_from_stream(data :StreamPeerBuffer):
 	size = data.get_16()
+	var has_break_already = false
 	var card_data = data_to_array(data, size)
-	if card_data[card_data.size()-1] != 0x000A:
-		card_data.append(0x000A) #Add a break character onto the final entry, which normally does not have one, for easier processing
 	while not card_data.is_empty():
 		var e = ScreenplayEntry.new()
 		e.read_entry(card_data)
 		entries.append(e)
+	#var final_entry = entries[entries.size()-1]
+	#if final_entry.type == EntryTypes.DATA:
+		#print(final_entry)
+		#if final_entry.info[0][final_entry.info[0].size() - 1] == 0x000A:
+			#size += 2
+
+
+func write(buf : StreamPeerBuffer):
+	buf.put_16(size)
+	for e in entries:
+		e.write(buf)
 
 	#var internal_size = calc_size()
 	#if internal_size > size:
@@ -158,4 +249,3 @@ func data_to_array(data: StreamPeerBuffer, data_size : int):
 
 class MapVisualCard:
 	extends ScreenplayCard
-	

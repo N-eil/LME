@@ -1,0 +1,35 @@
+[gd_scene load_steps=2 format=3 uid="uid://c5vi5i8oxnced"]
+
+[ext_resource type="Script" path="res://Map/exit_edit.gd" id="1_sxeqr"]
+
+[node name="ExitEdit" type="VBoxContainer"]
+script = ExtResource("1_sxeqr")
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 2
+text = "Up"
+horizontal_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="Field" type="OptionButton" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Room" type="OptionButton" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Screen" type="OptionButton" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="."]
+visible = false
+layout_mode = 2
+
+[node name="Button" type="Button" parent="HSplitContainer"]
+layout_mode = 2
+text = "Save"
+
+[node name="Button2" type="Button" parent="HSplitContainer"]
+layout_mode = 2
+text = "Go"

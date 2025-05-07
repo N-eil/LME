@@ -1,0 +1,56 @@
+[gd_scene load_steps=2 format=3 uid="uid://cdyvgvstqyu0h"]
+
+[sub_resource type="GDScript" id="GDScript_bnfyr"]
+script/source = "extends PanelContainer
+@onready var _card_container = $VSplitContainer/ScrollContainer/CardContainer
+@onready var _options = $VSplitContainer/HSplitContainer/OptionButton
+@export var active_card : ScreenplayCard :
+	set(c):
+		active_card = c
+		setup_card_container()
+		
+func setup_card_container():
+	for c in _card_container.get_children():
+		c.queue_free()
+	for e in active_card.entries:
+		for i in e.info:
+			if true:#i is String:
+				var l = LineEdit.new()
+				#l.expand_to_text_length = true
+				l.custom_minimum_size = Vector2i(300, 50)
+				l.text = \"%s\" % [i]
+				_card_container.add_child(l)
+	size = Vector2(0,0)
+func setup_dropdown():
+	for i in Globals.all_screenplay.cards.size():
+		_options.add_item(\"CARD %s\" % i)
+
+func _on_option_button_item_selected(index):
+	active_card = Globals.all_screenplay.cards[index]
+"
+
+[node name="ScreenplayEditor" type="PanelContainer"]
+custom_minimum_size = Vector2(0, 500)
+script = SubResource("GDScript_bnfyr")
+
+[node name="VSplitContainer" type="VSplitContainer" parent="."]
+layout_mode = 2
+
+[node name="HSplitContainer" type="HSplitContainer" parent="VSplitContainer"]
+layout_mode = 2
+
+[node name="OptionButton" type="OptionButton" parent="VSplitContainer/HSplitContainer"]
+layout_mode = 2
+
+[node name="Button" type="Button" parent="VSplitContainer/HSplitContainer"]
+layout_mode = 2
+text = "Save"
+
+[node name="ScrollContainer" type="ScrollContainer" parent="VSplitContainer"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="CardContainer" type="VBoxContainer" parent="VSplitContainer/ScrollContainer"]
+layout_mode = 2
+
+[connection signal="item_selected" from="VSplitContainer/HSplitContainer/OptionButton" to="." method="_on_option_button_item_selected"]

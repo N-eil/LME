@@ -1,13 +1,23 @@
-[gd_scene load_steps=2 format=3 uid="uid://b7i6ccua2bcft"]
+[gd_scene load_steps=3 format=3 uid="uid://b7i6ccua2bcft"]
+
+[ext_resource type="PackedScene" uid="uid://qnqdm7vosmaa" path="res://Map/ScreenEditPanel.tscn" id="1_rcq0b"]
 
 [sub_resource type="GDScript" id="GDScript_x5kdw"]
 script/source = "extends Node2D
-@export var map_display_card = ScreenplayCard :
-	set (m):
-		map_display_card = m
-		place_screens()
+#@export var map_display_card : ScreenplayCard :
+	#set (m):
+		#map_display_card = m
+		#place_screens()
+#
+#@export var map_name_card : ScreenplayCard : 
+	#set (n):
+		#$ScreenEditPanel.name_card = n
+		#map_name_card = n 
+#
+#@export var map_rcd_field : Field
 
-@export var map_name_card = ScreenplayCard 
+@export var screen_list_info : EditFriendlyField
+
 @onready var packed_screen = preload(\"res://Map/MapScreen.tscn\")
 const SCREEN_BUFFER = Vector2i(5,5)
 #   ICON AND COLOUR REFERENCE
@@ -66,21 +76,43 @@ func find_room_coords(room_num) -> Vector2i:
 func clear_screens():
 	for c in $MapHolder.get_children():
 		c.queue_free()
-		
+
+func add_screen(room_num : int, screen_num : int, screen_name : String, index: int):
+	Globals.active_msd.rooms[room_num].add_screen(screen_num)
+	screen_list_info.field.add_screen(room_num)
+	print(\"Adding room to screenplay at %s \" % index)
+	print(\"Adding room to data at %s %s\" % [room_num, screen_num])
+	var spot_in_map = 102
+	if index == -1:
+		index = screen_list_info.layout_card.entries.size()
+	screen_list_info.layout_card.add_entry_after(ScreenplayCard.ScreenplayEntry.new(ScreenplayCard.EntryTypes.DATA, [[\"Data\", spot_in_map, 1]]), index)
+	screen_list_info.name_card.add_entry_after(ScreenplayCard.ScreenplayEntry.new(ScreenplayCard.EntryTypes.MISC,[screen_name]), index + 3)
+
 func place_screens():
 	clear_screens()
-	for r in map_display_card.entries.size():
-		var room_pos = map_display_card.entries[r].info[0][1]
-		var room_app = map_display_card.entries[r].info[0][2]
+	for r in screen_list_info.layout_card.entries.size():
+		var room_pos = screen_list_info.layout_card.entries[r].info[0][1]
+		var room_appearance : Vector3i = ScreenplayCard.icon_num_to_vec(screen_list_info.layout_card.entries[r].info[0][2])
 		var screen : MapScreen = packed_screen.instantiate()
-		screen.screen_name = map_name_card.entries[r + 3].info[0]
-		screen.map_colour = room_app % 10
+		screen.screen_name = screen_list_info.name_card.entries[r + 3].info[0]
+		screen.first_icon = room_appearance.x
+		screen.second_icon = room_appearance.y
+		screen.map_colour = room_appearance.z
+		screen.internal_pos = screen_list_info.one_d_screen_array[r].internal_position
 		screen.position = find_room_coords(room_pos) * (screen.ROOM_DIMENSIONS + SCREEN_BUFFER)
+		screen.index = r
 		screen.connect(\"hover\", screen_hovered)
+		screen.connect(\"click\", screen_clicked)
 		$MapHolder.add_child(screen)
 
 func screen_hovered(screen_name):
 	$Label.text = screen_name
+
+func screen_clicked(index : int):
+	$ScreenEditPanel.visible = true
+	$ScreenEditPanel.setup_screen_info(screen_list_info, index)
+	var spot_to_add = screen_list_info.field.linear_order_to_internal_position(index)
+	add_screen(spot_to_add.y, spot_to_add.z, \"New Test Screen\", index)
 "
 
 [node name="FieldMapView" type="Node2D"]
@@ -93,3 +125,10 @@ offset_left = 138.0
 offset_top = -51.0
 offset_right = 213.0
 offset_bottom = -28.0
+
+[node name="ScreenEditPanel" parent="." instance=ExtResource("1_rcq0b")]
+visible = false
+offset_left = 645.0
+offset_top = -37.0
+offset_right = 645.0
+offset_bottom = -37.0

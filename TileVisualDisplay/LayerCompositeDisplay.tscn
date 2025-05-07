@@ -1,59 +1,40 @@
-[gd_scene load_steps=4 format=3 uid="uid://bg8rvyokyatv8"]
+[gd_scene load_steps=3 format=3 uid="uid://bg8rvyokyatv8"]
 
-[ext_resource type="PackedScene" uid="uid://bhbiho5r03tp8" path="res://TileVisualDisplay/tile_gridlines.tscn" id="1_rg5s3"]
+[ext_resource type="PackedScene" uid="uid://bhbiho5r03tp8" path="res://Utils/tile_gridlines.tscn" id="1_rg5s3"]
 
 [sub_resource type="GDScript" id="GDScript_04t61"]
 script/source = "extends Node2D
 # Composites multiple layers of mixed sizes. All must use the same tileset
 var active_tileset : TileSet
 var active_tileset_filename : String
-var active_editing_sublayer : Node2D = null
+var active_editing_sublayer : PaintableTileMap = null
 
-@onready var layer_tree : Tree = $EditType/Layers/LayerTree
-var current_selected_layer : TreeItem = null
+@export var SublayerSelect : Tree
+@onready var _layer_holder := $LayerHolder
+
+func _ready():
+	SublayerSelect.activated.connect(start_editing_sublayer)
+	Messages.connect(\"edit_type_changed\", edit_type_changed)
 
 #var all_layer_nodes : Array[LayerPortionDisplay]
 @onready var portion_prefab = load(\"res://TileVisualDisplay/layer_portion_display.tscn\")
 
-func load_graphics_to_tileset(path, animated_tiles_map, tilesize = 20):
-	var ts = TileSetAtlasSource.new()
-	var tex : Texture2D = load(path)
-	ts.set_texture(tex)
-	ts.set_texture_region_size(Vector2i(tilesize, tilesize))
-	for id in range(2500):
-		var pos = Vector2(id%50, floor(id/50))
-		var size = Vector2(1,1)
-		ts.create_tile(pos, size)
-#		if animated_tiles_map.has(id):
-#			print(\"framecount\")
-#			print(animated_tiles_map[id].frame_count)
-#			ts.set_tile_animation_columns(pos, 3)
-#			ts.set_tile_animation_speed(pos, 2)
-#			ts.set_tile_animation_frames_count(pos, 9)
-#		ts.tile_set_texture(id, tex)
-#		ts.tile_set_region(id, r)
-	return ts
-
 func set_editing_sublayer(layer_info : Vector2i):
 	if active_editing_sublayer:
 		active_editing_sublayer.set_process_unhandled_input(false)
-	print(\"ready to edit layer \" , layer_info[0], \"   sublayer \" , layer_info[1])
-	active_editing_sublayer = $LayerHolder.get_child(layer_info[0]).get_child(layer_info[1])
+	active_editing_sublayer = _layer_holder.get_child(layer_info[0]).get_child(layer_info[1])
 	active_editing_sublayer.set_process_unhandled_input(true)
 
 func rebuild_tileset(filename, tilesize = 20):
-	var screen_tileset = TileSet.new()
-	screen_tileset.tile_size = Vector2i(tilesize, tilesize)
-	var screen_tile_source = load_graphics_to_tileset(filename, null) #, current_msd_file.animated_tiles_map)
-	screen_tileset.add_source(screen_tile_source)
-	active_tileset = screen_tileset
+	active_tileset = TileSetLoader.make_tileset(filename, tilesize)
 	active_tileset_filename = filename
-	for c in $LayerHolder.get_children():
+	for c in _layer_holder.get_children():
 		if c is LayerPortionDisplay:
 			c.active_tileset = active_tileset
+			c.display_portion()
 
 func clear_display():
-	for c in $LayerHolder.get_children():
+	for c in _layer_holder.get_children():
 		c.free()
 
 # Gets from an MSD, and creates the resources for each layer in the room
@@ -67,7 +48,7 @@ func generate_from_msd(msd : MSDMap, r_index : int = 0, s_index = 0):
 		to_display.tilesheet_filename = Globals.make_graphics_filename(msd.graphics_filename)
 		if to_display.tilesheet_filename != active_tileset_filename:
 			rebuild_tileset(to_display.tilesheet_filename)
-		$LayerHolder.add_child(visual_layer)
+		_layer_holder.add_child(visual_layer)
 		visual_layer.active_tileset = active_tileset
 		visual_layer.z_index = layer_z
 		layer_z -= 20
@@ -75,103 +56,44 @@ func generate_from_msd(msd : MSDMap, r_index : int = 0, s_index = 0):
 		visual_layer.top_left_offset = layer.get_top_left_2d(s_index)
 		visual_layer.display_portion()
 
-	print($LayerHolder.get_child_count())
-	fill_layer_UI()
+	SublayerSelect.fill_layer_UI(_layer_holder.get_children())
 
-
-func fill_layer_UI():
-	layer_tree.clear()
-	var root = layer_tree.create_item()
+func generate_from_layer_portion(portion : LayerArtPortion):
+	clear_display()
+	var visual_layer : LayerPortionDisplay = portion_prefab.instantiate()
 	
-	for layer_node in $LayerHolder.get_children():
-		var layer = layer_node.to_display.stored_layer
-		var tree_layer = layer_tree.create_item(root)
-		tree_layer.set_text(0, \"LAYER - Height: \" + str(layer.layer_height) + \" Width: \" + str(layer.layer_width) )
-		tree_layer.set_selectable(0, true)
-		tree_layer.set_selectable(1, false)
-		tree_layer.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)
-		tree_layer.set_checked(1, true)
-		tree_layer.set_tooltip_text(1, \"Show/Hide\")
-		tree_layer.set_editable(1, true)
-		tree_layer.set_metadata(0, layer)
-		
-		for sublayer_node in layer_node.get_children():
-			var tree_sublayer = layer_tree.create_item(tree_layer)
-			tree_sublayer.set_text(0, \"Sublayer\")
-			tree_sublayer.set_selectable(0, true)
-			tree_sublayer.set_selectable(1, false)
-			tree_sublayer.set_cell_mode(1, TreeItem.CELL_MODE_CHECK)
-			tree_sublayer.set_checked(1, true)
-			tree_sublayer.set_tooltip_text(1, \"Show/Hide\")
-			tree_sublayer.set_editable(1, true)
-			tree_sublayer.set_metadata(0, sublayer_node)
+	portion.tilesheet_filename = Globals.current_graphics_filename
+	if portion.tilesheet_filename != active_tileset_filename or portion.tilesheet_filename == \"\":
+		rebuild_tileset(portion.tilesheet_filename)
+	$TileGridlines.height = portion.height
+	$TileGridlines.width = portion.width
 
-	$EditType.size = Vector2(300,600)
+	_layer_holder.add_child(visual_layer)
+	visual_layer.active_tileset = active_tileset
+	visual_layer.z_index = 0
+	visual_layer.to_display = portion
+	visual_layer.top_left_offset = Vector2i.ZERO
+	visual_layer.display_portion()
+	
+	
+	SublayerSelect.fill_layer_UI(_layer_holder.get_children())
 
 func get_sublayer_info_from_tree(tree_layer):
 	return Vector2(tree_layer.get_parent().get_index(), tree_layer.get_index())
-
-func _on_LayerTree_item_edited():
-	var checked_layer : TreeItem = layer_tree.get_edited()
-	var checked_metadata = checked_layer.get_metadata(0)
-	if checked_metadata is TileMap:
-		set_editing_sublayer(get_sublayer_info_from_tree(checked_layer))
-		var screen_layer = checked_metadata as TileMap
-		screen_layer.visible = checked_layer.is_checked(1)
-	else:
-		for sublayer in checked_layer.get_children():
-			var sublayer_metadata = sublayer.get_metadata(0) as TileMap
-			sublayer_metadata.visible = checked_layer.is_checked(1)
-			sublayer.set_checked(1, checked_layer.is_checked(1))
-
-
-func _on_layer_tree_item_selected():
-	if current_selected_layer:
-		current_selected_layer.clear_custom_bg_color(0)
 	
-	current_selected_layer = layer_tree.get_selected()
-	current_selected_layer.set_custom_bg_color(0, Color.RED)
-	if current_selected_layer.get_metadata(0) is TileMap:
-		set_editing_sublayer(get_sublayer_info_from_tree(current_selected_layer))
-"
+	
+func start_editing_sublayer(sublayer : TreeItem):
+	set_editing_sublayer(get_sublayer_info_from_tree(sublayer))
 
-[sub_resource type="GDScript" id="GDScript_6al7e"]
-script/source = "extends TabContainer
-# Called every frame. 'delta' is the elapsed time since the previous frame.
-#func _process(delta):
-#	pass
-@onready var editor = get_parent()
 
-func _on_Layers_pressed():
-	editor.current_editing_type = editor.canvas_editing_types.LAYERS
-
-func _on_Collision_pressed():
-	editor.current_editing_type = editor.canvas_editing_types.COLLISION
+func edit_type_changed(e):
+	$TileGridlines.visible = (e == Globals.EditType.ART)
 "
 
 [node name="LayerCompositeDisplay" type="Node2D"]
 script = SubResource("GDScript_04t61")
 
-[node name="EditType" type="TabContainer" parent="."]
-offset_left = 772.644
-offset_top = 45.0
-offset_right = 1111.64
-offset_bottom = 181.0
-scale = Vector2(0.8, 0.8)
-use_hidden_tabs_for_min_size = true
-script = SubResource("GDScript_6al7e")
-
-[node name="Layers" type="PanelContainer" parent="EditType"]
-layout_mode = 2
-
-[node name="LayerTree" type="Tree" parent="EditType/Layers"]
-layout_mode = 2
-columns = 2
-
 [node name="LayerHolder" type="Node2D" parent="."]
 
 [node name="TileGridlines" parent="." instance=ExtResource("1_rg5s3")]
 visible = false
-
-[connection signal="item_edited" from="EditType/Layers/LayerTree" to="." method="_on_LayerTree_item_edited"]
-[connection signal="item_selected" from="EditType/Layers/LayerTree" to="." method="_on_layer_tree_item_selected"]

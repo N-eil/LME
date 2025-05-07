@@ -1,0 +1,66 @@
+[gd_scene load_steps=5 format=3 uid="uid://daxow2cge1p41"]
+
+[ext_resource type="Script" path="res://TileCollision/CollisionpadWindow.gd" id="1_3m2kx"]
+[ext_resource type="PackedScene" uid="uid://cty0wk2nlqm2i" path="res://TileCollision/collision_tilemap.tscn" id="2_sksss"]
+[ext_resource type="PackedScene" uid="uid://ckbryhmvnye4g" path="res://Utils/load_object_dialog.tscn" id="4_pcbhp"]
+[ext_resource type="PackedScene" uid="uid://dmarwfkn1e40n" path="res://Utils/save_object_dialog.tscn" id="5_hkmhh"]
+
+[node name="CollisionpadWindow" type="Window"]
+position = Vector2i(0, 36)
+size = Vector2i(800, 500)
+script = ExtResource("1_3m2kx")
+
+[node name="CollisionTilemap" parent="." instance=ExtResource("2_sksss")]
+position = Vector2(64, 64)
+scale = Vector2(2, 2)
+
+[node name="Control" type="MarginContainer" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -416.0
+offset_bottom = 171.0
+grow_horizontal = 0
+size_flags_horizontal = 0
+size_flags_vertical = 0
+theme_override_constants/margin_left = 200
+theme_override_constants/margin_top = 50
+theme_override_constants/margin_right = 20
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Control"]
+layout_mode = 2
+
+[node name="WidthSetter" type="SpinBox" parent="Control/VBoxContainer"]
+layout_mode = 2
+min_value = 1.0
+value = 1.0
+prefix = "Width  "
+
+[node name="HeightSetter" type="SpinBox" parent="Control/VBoxContainer"]
+layout_mode = 2
+min_value = 1.0
+value = 1.0
+prefix = "Height "
+
+[node name="CreateButton" type="Button" parent="Control/VBoxContainer"]
+layout_mode = 2
+text = "Create
+"
+
+[node name="SaveButton" type="Button" parent="Control/VBoxContainer"]
+layout_mode = 2
+text = "Save to file"
+
+[node name="LoadButton" type="Button" parent="Control/VBoxContainer"]
+layout_mode = 2
+text = "Load from file"
+
+[node name="LoadObjectDialog" parent="." instance=ExtResource("4_pcbhp")]
+
+[node name="SaveObjectDialog" parent="." instance=ExtResource("5_hkmhh")]
+
+[connection signal="pressed" from="Control/VBoxContainer/CreateButton" to="." method="_on_create_button_pressed"]
+[connection signal="pressed" from="Control/VBoxContainer/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="Control/VBoxContainer/LoadButton" to="." method="_on_load_button_pressed"]
+[connection signal="file_selected" from="LoadObjectDialog" to="." method="_on_load_object_dialog_file_selected"]
+[connection signal="file_selected" from="SaveObjectDialog" to="." method="_on_save_object_dialog_file_selected"]

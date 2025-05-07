@@ -1,14 +1,42 @@
-[gd_scene load_steps=3 format=3 uid="uid://b3khfvpx88fe"]
+[gd_scene load_steps=5 format=3 uid="uid://b3khfvpx88fe"]
 
 [ext_resource type="Script" path="res://Map/MapScreen.gd" id="1_snedg"]
+[ext_resource type="Texture2D" uid="uid://dj7kbki6l2p5s" path="res://Map/MapSprites.png" id="2_34iyv"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5sxg3"]
+size = Vector2(45, 30)
+
+[sub_resource type="LabelSettings" id="LabelSettings_ermpn"]
+font_size = 14
+font_color = Color(0, 0, 0, 1)
 
 [node name="MapScreen" type="Area2D"]
 script = ExtResource("1_snedg")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(23, 15)
 shape = SubResource("RectangleShape2D_5sxg3")
 
+[node name="Label" type="Label" parent="."]
+offset_left = 4.0
+offset_top = -2.0
+offset_right = 44.0
+offset_bottom = 21.0
+text = "10   5"
+label_settings = SubResource("LabelSettings_ermpn")
+
+[node name="FirstIcon" type="Sprite2D" parent="."]
+position = Vector2(9, 22)
+texture = ExtResource("2_34iyv")
+hframes = 13
+frame = 7
+
+[node name="SecondIcon" type="Sprite2D" parent="."]
+position = Vector2(35, 22)
+texture = ExtResource("2_34iyv")
+hframes = 13
+frame = 7
+
+[connection signal="input_event" from="." to="." method="_on_input_event"]
 [connection signal="mouse_entered" from="." to="." method="_on_mouse_entered"]
 [connection signal="mouse_exited" from="." to="." method="_on_mouse_exited"]

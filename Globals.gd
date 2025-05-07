@@ -1,11 +1,17 @@
 extends Node
-var all_fields = []
+var all_fields : Array[Field] = []
 var all_screenplay : ScreenplayFull
-
+var active_msd : MSDMap
 var all_position_objects = {}
 var all_nonposition_objects = {}
 
+var current_graphics_filename : String
 
+var sketchpad_window : Window 
+var collisionpad_window : Window 
+
+var mult_canvas := CanvasItemMaterial.new()
+var add_canvas := CanvasItemMaterial.new()
 
 var active_art_tile_index : int = 0
 var active_collision_tile_index : int = 1
@@ -13,11 +19,25 @@ var active_collision_tile_index : int = 1
 var tile_draw_settings = [false, false, false]
 enum EditType {
 	ART,
+	ART_COPY,
 	COLLISION,
 	OBJECT,
 	NONE
 }
-var current_edit_type : EditType = EditType.ART : set = set_edit_type
+var current_edit_type : EditType = EditType.NONE : set = set_edit_type
+
+var copy_top_left : Vector2i = Vector2i(-1,-1)
+
+func _ready():
+	Messages.connect("new_art_palette", update_selected_palette)
+	Messages.connect("art_cell_selected", set_active_art_tile)
+	Messages.connect("collision_cell_selected", set_active_collision_tile)
+
+	add_canvas.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	mult_canvas.blend_mode = CanvasItemMaterial.BLEND_MODE_MUL
+
+func update_selected_palette(e):
+	current_graphics_filename = e
 
 func set_edit_type(e):
 	current_edit_type = e
@@ -498,7 +518,7 @@ const OBJECT_REFERENCE = {
 			"tex height",
 			"detection size (centered)"
 		],
-		"notes": "    0 -\n\n    \n",
+		"notes": "\n",
 		"write_flag_notes": "    update 0 // (test) if world[idx]==val then active else inactive\n    update 1 and 3 when deactivated if initially active\n    update 2 when activated if initially deactivated\n"
 	},
 	"0x33": {
@@ -2166,8 +2186,3 @@ const OBJECT_REFERENCE = {
 		"write_flag_notes": ""
 	}
 }
-
-# Called when the node enters the scene tree for the first time.
-func _ready():
-	Messages.connect("art_cell_selected", set_active_art_tile)
-	Messages.connect("collision_cell_selected", set_active_collision_tile)

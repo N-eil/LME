@@ -3,8 +3,15 @@
 [sub_resource type="GDScript" id="GDScript_13usm"]
 script/source = "extends PaintableTileMap
 
-func do_when_clicked(tile_position : Vector2):
-	get_parent().cell_clicked(self, tile_position)
+#func _ready():
+	#Messages.connect(\"edit_type_changed\", edit_type_changed)
+	#set_process_unhandled_input(false)
+
+func do_when_clicked(tile_position : Vector2i, e : InputEventMouse = null):
+	get_parent().cell_clicked(self, tile_position, e)
+
+#func edit_type_changed(e):
+	#set_process_unhandled_input(e == Globals.EditType.ART)
 "
 
 [node name="MSDLayer" type="TileMap"]

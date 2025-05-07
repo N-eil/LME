@@ -1,6 +1,8 @@
-[gd_scene load_steps=2 format=3 uid="uid://dcelqgdiyou5u"]
+[gd_scene load_steps=4 format=3 uid="uid://dcelqgdiyou5u"]
 
 [ext_resource type="Script" path="res://ObjectInfoSheet.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://ckbryhmvnye4g" path="res://Utils/load_object_dialog.tscn" id="2_flkc7"]
+[ext_resource type="PackedScene" uid="uid://dmarwfkn1e40n" path="res://Utils/save_object_dialog.tscn" id="3_vbwv0"]
 
 [node name="ObjectInfoSheet" type="PanelContainer"]
 offset_right = 339.0
@@ -35,7 +37,17 @@ layout_mode = 2
 
 [node name="SaveButton" type="Button" parent="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
-text = "Save"
+text = "Save To Game"
+
+[node name="ToFileButton" type="Button" parent="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Save To File
+"
+
+[node name="FromFileButton" type="Button" parent="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
+layout_mode = 2
+text = "Load From File
+"
 
 [node name="CancelButton" type="Button" parent="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer"]
 layout_mode = 2
@@ -84,5 +96,11 @@ it is multiple lines long
 wow"
 fit_content = true
 
+[node name="LoadObjectDialog" parent="." instance=ExtResource("2_flkc7")]
+
+[node name="SaveObjectDialog" parent="." instance=ExtResource("3_vbwv0")]
+
 [connection signal="item_selected" from="VSplitContainer/HBoxContainer/ObjectTypeMenu" to="." method="_on_ObjectTypeMenu_item_selected"]
 [connection signal="pressed" from="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer/SaveButton" to="." method="_on_SaveButton_pressed"]
+[connection signal="pressed" from="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer/ToFileButton" to="." method="_on_to_file_button_pressed"]
+[connection signal="pressed" from="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer/FromFileButton" to="." method="_on_from_file_button_pressed"]
