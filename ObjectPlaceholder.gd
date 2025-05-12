@@ -9,8 +9,7 @@ var object : set = set_object
 var editor_ref
 
 func set_object(o):
-	var object_name = ("0x%02X" % o.object_id)
-	$Node2D/IDTag.text = object_name + " " + Globals.OBJECT_REFERENCE[object_name]["name"]
+	$Node2D/IDTag.text = "%s" % o
 	object = o
 	
 

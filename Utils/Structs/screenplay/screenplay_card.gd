@@ -1,8 +1,8 @@
 extends Resource
 class_name ScreenplayCard
 enum EntryTypes {DATA, FLAG, ITEM, POSE, MANTRA, MISC}
-var size : int
-var entries : Array = []
+@export var size : int
+@export var entries : Array = []
 
 enum MapIcons {BLANK, BACKSIDE, GRAIL, CROSS, FAIRY, BROWNDOOR, BLUEDOOR, PHILOSOPHER, UP, DOWN, LEFT, RIGHT, BONE}
 
@@ -49,16 +49,22 @@ func add_entry_after(entry_data : ScreenplayEntry, entry_pos : int = entries.siz
 		entry_data.info.append(["BREAK"])
 	entries.insert(entry_pos+1, entry_data)
 
-func from_line_array(full_line_array):
-	entries = []
+static func from_line_array(full_line_array):
+	var card = ScreenplayCard.new()
 	for l in full_line_array:
-		entries.append(ScreenplayEntry.from_string(l))
-	size = calc_size()
+		card.entries.append(ScreenplayEntry.from_string(l))
+	card.size = card.calc_size()
+	return card
+
+# Mutates this card into the passed card. Useful for saving.
+func become(new_card):
+	entries = new_card.entries
+	size = new_card.size
 
 # A card is made of of multiple entries, which are essentially different "lines" of info
 class ScreenplayEntry:
-	var type : EntryTypes
-	var info : Array  = []
+	@export var type : EntryTypes
+	@export var info : Array  = []
 	func _init(t : EntryTypes = EntryTypes.MISC, i : Array = []):
 		type = t
 		info = i

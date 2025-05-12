@@ -43,7 +43,6 @@ func _on_save_object_dialog_file_selected(path):
 	hitmask_saver.height = len(hitmask_saver.hitmask)
 	hitmask_saver.width = len(hitmask_saver.hitmask[0])
 	ResourceSaver.save(hitmask_saver, path)
-	pass
 
 func _on_save_button_pressed():
 	$SaveObjectDialog.popup()

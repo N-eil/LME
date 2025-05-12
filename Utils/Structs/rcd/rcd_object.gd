@@ -12,6 +12,10 @@ class_name RCDObject
 @export var write_byte_operations : Array
 @export var parameters : Array 
 
+func _to_string():
+	var object_name = ("0x%02X" % object_id)
+	return object_name + " " + Globals.OBJECT_REFERENCE[object_name]["name"]
+
 func read(data : StreamPeerBuffer, with_position : bool = false):
 	object_id  = data.get_16()
 	var number_of_flags = data.get_u8()
@@ -66,34 +70,3 @@ func write(buf : StreamPeerBuffer):
 		w.write(buf)
 	for p in parameters:
 		buf.put_16(p)
- #
-#class TestFlag extends Resource:
-	#@export var flag : int
-	#@export var value : int
-	#@export var operation : int
-	#
-	#func read(data : StreamPeerBuffer):
-		#flag = data.get_16()
-		#value = data.get_8()    
-		#operation  = data.get_8()
-	#
-	#func write(buf : StreamPeerBuffer):
-		#buf.put_16(flag)
-		#buf.put_8(value)
-		#buf.put_8(operation)
-#
-#
-#class WriteFlag extends Resource:
-	#@export var flag : int
-	#@export var value : int
-	#@export var operation : int
-	#
-	#func read(data : StreamPeerBuffer):
-		#flag = data.get_16()
-		#value = data.get_8()    
-		#operation  = data.get_8()
-	#
-	#func write(buf : StreamPeerBuffer):
-		#buf.put_16(flag)
-		#buf.put_8(value)
-		#buf.put_8(operation)
