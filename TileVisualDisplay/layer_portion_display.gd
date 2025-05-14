@@ -6,11 +6,13 @@ class_name LayerPortionDisplay
 
 
 var active_tileset : TileSet
-var top_left_offset : Vector2 = Vector2.ZERO
+var top_left_offset : Vector2i = Vector2i.ZERO
 
 func cell_clicked(l, pos : Vector2i, e : InputEventMouse):
 	if Globals.current_edit_type != Globals.EditType.ART:
 		return
+
+	pos += top_left_offset
 
 	# When holding ctrl, first click is top left, 2nd click is bottom right of copy box
 	if e.ctrl_pressed:
@@ -58,9 +60,9 @@ func update_single_cell_in_data(sublayer, x, y):
 
 # Updates a single cell onscreen without changing the underlying data. Use when changing the sublayer or to fix desyncs.
 func update_single_cell_onscreen(sublayer_index:int, x:int, y :int):
-	var tile : Tile = to_display.stored_layer.sublayers[sublayer_index].tiles[top_left_offset.y + y][top_left_offset.x + x]
+	var tile : Tile = to_display.stored_layer.sublayers[sublayer_index].tiles[y][x]
 	if tile.type != 0:
-		set_single_cell_with_flips(get_child(sublayer_index), Vector2i(x,y), Vector2i(tile.coords%50, floor(tile.coords/50)), tile.make_art_flip_flags())
+		set_single_cell_with_flips(get_child(sublayer_index), Vector2i(x,y) - top_left_offset, Vector2i(tile.coords%50, floor(tile.coords/50)), tile.make_art_flip_flags())
 		set_tilemap_blending(get_child(sublayer_index), tile)
 
 func update_all_cells_onscreen():
