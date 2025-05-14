@@ -12,6 +12,15 @@ var zone_id : int
 func _init(id):
 	zone_id = id
 
+static func make_blank_field() -> Field:
+	var new_field := Field.new(-1) 
+	new_field.name_size = 1
+	new_field.name = [1]
+	new_field.objects_count = 0
+	new_field.objects = []
+	new_field.rooms = []
+	return new_field
+
 func linear_order_to_internal_position(linear_number : int):
 	for r in range(room_count):
 		for s in range(rooms[r].screen_count):
@@ -31,12 +40,19 @@ func internal_position_to_linear_order(pos : Vector3i):
 	printerr("Asked for linear order of a screen outside the field!")
 	return -1
 
-func add_screen(room_id): #TODO: Add screens to other places than just directly right
-	if (room_id >= room_count):
-		room_count += 1
-		room_id = room_count - 1
-		rooms.append(RCDRoom.new(room_id))
-	rooms[room_id].add_screen(zone_id)
+#Construct the rooms fully elsewhere before adding them
+func add_room(adding_room : RCDRoom):
+	room_count += 1
+	rooms.append(adding_room)
+
+
+#
+#func add_screen(room_id): #TODO: Add screens to other places than just directly right
+	#if (room_id >= room_count):
+		#room_count += 1
+		#room_id = room_count - 1
+		#rooms.append(RCDRoom.new(room_id))
+	#rooms[room_id].add_blank_screen(zone_id)
 
 func read(data : StreamPeerBuffer, msd : MSDMap):
 	room_count = msd.room_count

@@ -7,7 +7,7 @@ var without_position_count: int
 var screen_objects_without_position: Array
 var screen_objects: Array
 var screen_name: Array
-var exits: Array	
+var exits: Array
 var internal_position : Vector3i
 
 

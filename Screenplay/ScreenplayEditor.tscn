@@ -1,4 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://cdyvgvstqyu0h"]
+[gd_scene load_steps=3 format=3 uid="uid://cdyvgvstqyu0h"]
+
+[ext_resource type="PackedScene" uid="uid://dmarwfkn1e40n" path="res://Utils/save_object_dialog.tscn" id="1_ke5bp"]
 
 [sub_resource type="GDScript" id="GDScript_bnfyr"]
 script/source = "extends PanelContainer
@@ -32,12 +34,23 @@ func _on_save_button_pressed():
 	for c in _card_container.get_children():
 		full_line_array.append(c.text)
 	
-	active_card.from_line_array(full_line_array)
+	active_card.become(ScreenplayCard.from_line_array(full_line_array))
 	#var editable_entries = _card_container.get_children()
 	#for i in range(len(editable_entries)):
 		#active_card.entries[i] = str_to_var(editable_entries[i].text)
 #
 	print(\"Done saving\")
+
+
+func _on_file_save_button_pressed():
+	$SaveObjectDialog.popup()
+
+func _on_save_object_dialog_file_selected(path):
+	var full_line_array := []
+	for c in _card_container.get_children():
+		full_line_array.append(c.text)
+
+	ResourceSaver.save(ScreenplayCard.from_line_array(full_line_array), path)
 "
 
 [node name="ScreenplayEditor" type="PanelContainer"]
@@ -47,15 +60,21 @@ script = SubResource("GDScript_bnfyr")
 [node name="VSplitContainer" type="VSplitContainer" parent="."]
 layout_mode = 2
 
-[node name="HSplitContainer" type="HSplitContainer" parent="VSplitContainer"]
+[node name="HSplitContainer" type="HBoxContainer" parent="VSplitContainer"]
 layout_mode = 2
+theme_override_constants/separation = 15
 
 [node name="OptionButton" type="OptionButton" parent="VSplitContainer/HSplitContainer"]
 layout_mode = 2
 
 [node name="SaveButton" type="Button" parent="VSplitContainer/HSplitContainer"]
 layout_mode = 2
-text = "Save"
+text = "Save to Game"
+
+[node name="FileSaveButton" type="Button" parent="VSplitContainer/HSplitContainer"]
+layout_mode = 2
+text = "Save to File
+"
 
 [node name="ScrollContainer" type="ScrollContainer" parent="VSplitContainer"]
 layout_mode = 2
@@ -64,5 +83,9 @@ horizontal_scroll_mode = 0
 [node name="CardContainer" type="VBoxContainer" parent="VSplitContainer/ScrollContainer"]
 layout_mode = 2
 
+[node name="SaveObjectDialog" parent="." instance=ExtResource("1_ke5bp")]
+
 [connection signal="item_selected" from="VSplitContainer/HSplitContainer/OptionButton" to="." method="_on_option_button_item_selected"]
 [connection signal="pressed" from="VSplitContainer/HSplitContainer/SaveButton" to="." method="_on_save_button_pressed"]
+[connection signal="pressed" from="VSplitContainer/HSplitContainer/FileSaveButton" to="." method="_on_file_save_button_pressed"]
+[connection signal="file_selected" from="SaveObjectDialog" to="." method="_on_save_object_dialog_file_selected"]

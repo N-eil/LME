@@ -6,12 +6,21 @@ var room_objects: Array
 var screens: Array
 
 var screen_count : int
-var room_id : int
+var room_id : int #Not used ingame. Stores something for editor use only, but I'm not sure what. Use -1 for unknown/uninitialized
 
 func _init(id):
 	room_id = id
 
-func add_screen(zone_id):#, screen_id):   TODO: add screens in other places
+static func make_blank_room(screen_count : int) -> RCDRoom:
+	var new_room = RCDRoom.new(-1)
+	new_room.room_object_count = 0
+	new_room.room_objects = []
+	new_room.screens = []
+	for i in range(screen_count):
+		new_room.add_blank_screen(-1)
+	return new_room
+	
+func add_blank_screen(zone_id):#, screen_id):   TODO: add screens in other places
 	var s = Screen.make_blank_screen()
 	var screen_id = screen_count
 	screen_count += 1
@@ -30,6 +39,7 @@ func read(data : StreamPeerBuffer, read_screen_count: int):
 		var o = RCDObject.new()
 		o.read(data, false)
 		room_objects.append(o)
+		print(o)
 	
 	for i in range(screen_count):
 		var s = Screen.new()

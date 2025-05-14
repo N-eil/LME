@@ -7,9 +7,9 @@ extends VBoxContainer
 
 @export var exit_info : Exit : 
 	set(e) :
-		_field.selected = e.zone_id
-		_room.selected = e.room_id
-		_screen.selected = e.screen_id
+		_field.selected = 0 if e.zone_id < 0 else e.zone_id
+		_room.selected = 0 if e.room_id < 0 else e.room_id
+		_screen.selected = 0 if e.screen_id < 0 else e.screen_id
 		exit_info = e
 
 @onready var _field = $HBoxContainer/Field
@@ -17,7 +17,6 @@ extends VBoxContainer
 @onready var _screen = $HBoxContainer/Screen
 
 func dropdown_changed(index, edit_type):
-	print("Editing a %s" % edit_type)
 	if edit_type == "field":
 		exit_info.zone_id = index
 	if edit_type == "room":

@@ -22,9 +22,8 @@ func _on_EditType_tab_changed(tab):
 # Declare member variables here. Examples:
 # var a = 2
 # var b = "text"
-var loaded_rsd_buffer
+var loaded_rcd_buffer
 
-var all_msd = []
 const TILESIZE = 20
 
 #onready var current_directory = OS.get_executable_path().get_base_dir()
@@ -54,14 +53,14 @@ func load_screenplay(path):
 	Globals.all_screenplay.decode_from_stream(loaded_buffer)
 
 func load_rcd():
-	loaded_rsd_buffer = StreamPeerBuffer.new()
+	loaded_rcd_buffer = StreamPeerBuffer.new()
 	var rsd_file = FileAccess.open(rcd_directory.path_join("script.rcd"), FileAccess.READ)
 	var temp_buffer = rsd_file.get_buffer(rsd_file.get_length())
 #    print(temp_buffer.size())   
-	loaded_rsd_buffer.put_data(temp_buffer)
-	loaded_rsd_buffer.big_endian = true
-	loaded_rsd_buffer.seek(0)
-	loaded_rsd_buffer.get_16()
+	loaded_rcd_buffer.put_data(temp_buffer)
+	loaded_rcd_buffer.big_endian = true
+	loaded_rcd_buffer.seek(0)
+	loaded_rcd_buffer.get_16()
 
 	rsd_file.close()
 
@@ -114,19 +113,18 @@ func screen_exists(z, r = 0, s = 0):
 func _on_screen_selected(index):
 
 	Messages.emit_signal("new_art_palette", Globals.make_graphics_filename(current_msd_file.graphics_filename))
-	#display_screen($RoomCanvas/Visuals, current_zone_id, current_room_id, index)
 	$LayerCompositeDisplay.generate_from_msd(current_msd_file, current_room_id, index)
 	$CollisionTilemap.from_msd_room(current_msd_file.rooms[current_room_id], index)
 	#$LayerPortionDisplay.display_portion()
-	display_objects_in_screen($RoomCanvas/Objects, current_zone_id, current_room_id, index)
+	display_objects_in_screen($ObjectCanvas, current_zone_id, current_room_id, index)
 
 func show_object_edit_menu(o):
-	$EditType.current_tab = 2
-	$EditType/Objects.object = o
-	$EditType/Objects.display(o)
-	$EditType.size = Vector2(300,0)
-	$EditType/Objects.visible = false
-	$EditType/Objects.call_deferred("set_visible", true)
+	#$EditType.current_tab = 2
+	$ObjectEditor.object = o
+	$ObjectEditor.display(o)
+	#$EditType.size = Vector2(300,0)
+	$ObjectEditor.visible = false
+	$ObjectEditor.call_deferred("set_visible", true)
 		
 func display_objects_in_screen(location, zone_id, room_id, screen_id):
 	for c in location.get_children():
@@ -144,10 +142,12 @@ func display_objects_in_screen(location, zone_id, room_id, screen_id):
 		o.object = object
 		o.editor_ref = self
 		location.add_child(o)
+		print("%s" % object)
 
 	var i = 2
 	for object in display_screen.screen_objects_without_position:
 		var o = object_placeholder_prefab.instantiate()
+		# Just place them all at the bottom of the screen below the art
 		o.position = Vector2(20, ROOM_HEIGHT * 20 + i * 32)
 		o.object = object
 		o.editor_ref = self
@@ -190,16 +190,19 @@ func begin_loading():
 	load_rcd() #TODO: read the RCD again
 	load_screenplay("ignore this")
 	
+	
+	# Note that it is impossible to parse an entire .rcd file without simultaneously 
+	# parsing all the corresponding .msd files, because the .rcd format does not include
+	# any explicit markers of how many zones, rooms, or screens there are.
 	for i in range(26):
 		var f = Field.new(i)
 		var msd = load_msd(msd_directory.path_join("map" + ("%02d" % i) + ".msd"), i, true)
-		f.read(loaded_rsd_buffer, msd)
+		f.read(loaded_rcd_buffer, msd) #Use each loaded msd file to parse its corresponding rcd fiel
 		Globals.all_fields.append(f)
-		if i >  15:
-			print(i)
-#        all_msd.append(msd)
-#        display_room($RoomCanvas/TileMap, all_msd[0], 0, 0, 0)
-	print("READING DONE")    
+
+	print("READING DONE")
+
+	
 	$ScreenplayEditor.setup_dropdown()
 	# Print the info about all objects, mostly for debugging
 #	var posfile = FileAccess.open("allpositionobjects.json", FileAccess.WRITE)
@@ -218,6 +221,42 @@ func begin_loading():
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 #func _process(delta):
 #    pass
+
+func write_custom_field():
+	# Temporary section to write a custom field at field index 1
+	var custom_field_id :int = 1
+	var room_sizes : Array = [3,3,2,1,2,2,4,4,1,1] #Horizontal length of each room following internal order
+	#This writes the RCD portion of the field (exits, objects) with empty rooms of the correct size
+	Globals.all_fields[custom_field_id] = Field.make_blank_field()
+	for r in room_sizes:
+		Globals.all_fields[custom_field_id].add_room(RCDRoom.make_blank_room(r))
+	
+	#This writes the MSD portion of the field (graphics, collision) with single-layer empty rooms of the correct size 
+	current_msd_file = load_msd(msd_directory.path_join("map" + ("%02d" % custom_field_id) + ".msd"), custom_field_id)
+	Globals.active_msd = current_msd_file
+	current_msd_file.room_count = 0
+	current_msd_file.rooms = []
+	for r in room_sizes:
+		current_msd_file.add_room(MSDRoom.create_large_room(Vector2i(r,1)))
+	
+	#This writes the screenplay portion of the field (map visuals, room names) with blank entries
+	Globals.all_screenplay.clear_field_from_map(custom_field_id)
+	
+	# For names, first entry is about bgm, 2nd is unused, get these out of the way before the real entries 
+	Globals.all_screenplay.cards[Globals.all_screenplay.map_name_cards[custom_field_id]].add_entry_after(ScreenplayEntry.from_string('[0, [["Data", 898, 42, 10]]]'))
+	Globals.all_screenplay.cards[Globals.all_screenplay.map_name_cards[custom_field_id]].add_entry_after(ScreenplayEntry.from_string('[5, ["巨人霊廟"]]'))
+	# Then, add one name for each screen, keeping in mind a screen contains multiple rooms. Also the first name is the field overall.
+	Globals.all_screenplay.cards[Globals.all_screenplay.map_name_cards[custom_field_id]].add_entry_after(ScreenplayEntry.from_string('[5, ["Crystal Temple"]]'))
+	for i in room_sizes:
+		for j in range(i):
+			Globals.all_screenplay.cards[Globals.all_screenplay.map_name_cards[custom_field_id]].add_entry_after(ScreenplayEntry.from_string('[5, ["Placeholder Name"]]'))
+
+	# When writing room locations for the map, there's no filler entries - start right away in MSD/RCD order
+	var room_positions : Array = [201, 301, 401, 102, 202, 302, 3, 103, 200, 400, 500, 501, 601, 203, 303, 403, 503, 404, 504, 604, 704, 703, 505]
+	for pos in room_positions:
+		Globals.all_screenplay.cards[Globals.all_screenplay.map_display_cards[custom_field_id]].add_entry_after(ScreenplayEntry.from_string('[0, [["Data", ' + str(pos) +', 1]]]'))
+	
+	current_zone_id = custom_field_id
 
 func _on_Button_pressed(game : bool):
 	# TODO: deep clone instead of reference
@@ -262,9 +301,6 @@ func save_msd_changes():
 	written_msd.close()
 
 	print("MSD written!")
-	
-	#Some sort of backup?
-	current_msd_file.rooms[current_room_id].write_to_file()
 
 func save_rcd_changes():
 	var write_file = FileAccess.open(rcd_directory.path_join("script.rcd"), FileAccess.WRITE)    
@@ -291,17 +327,7 @@ func clear_room_visuals(zone_id, room_id):
 				for t in r:
 					t.coords = 45
 					t.type = 1
-					
-func cell_clicked(tilemap, position):
-	print("rcd clicked")
-	var new_coords = 34
-	var new_object = 0x08
-	
-	if current_editing_type == canvas_editing_types.LAYERS:
-		add_visual_tile(tilemap, position,new_coords)
-	elif current_editing_type == canvas_editing_types.OBJECTS:
-		add_position_object(position, new_object)
- 
+
 func add_visual_tile(tilemap, position, new_coords, new_type = 1): 
 	tilemap.set_cell(position.x, position.y, new_coords)
 

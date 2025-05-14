@@ -67,6 +67,10 @@ const SCREEN_BUFFER = Vector2i(5,5)
 	#//         6+- Transparent -- Icons show
 	#
 
+# Where the room is located on the map is stored as a single number.
+# Units position - vertical height (top is 0)
+# Hundreds position - horizontal distance (left is 0)
+# This means the internal room data can be in any order, since the map layout is drawn by screenplay using this
 func find_room_coords(room_num) -> Vector2i:
 	var result : Vector2i = Vector2i.ZERO
 	result.y = room_num % 100
@@ -85,8 +89,8 @@ func add_screen(room_num : int, screen_num : int, screen_name : String, index: i
 	var spot_in_map = 102
 	if index == -1:
 		index = screen_list_info.layout_card.entries.size()
-	screen_list_info.layout_card.add_entry_after(ScreenplayCard.ScreenplayEntry.new(ScreenplayCard.EntryTypes.DATA, [[\"Data\", spot_in_map, 1]]), index)
-	screen_list_info.name_card.add_entry_after(ScreenplayCard.ScreenplayEntry.new(ScreenplayCard.EntryTypes.MISC,[screen_name]), index + 3)
+	screen_list_info.layout_card.add_entry_after(ScreenplayEntry.new(ScreenplayEntry.EntryTypes.DATA, [[\"Data\", spot_in_map, 1]]), index)
+	screen_list_info.name_card.add_entry_after(ScreenplayEntry.new(ScreenplayEntry.EntryTypes.MISC,[screen_name]), index + 3)
 
 func place_screens():
 	clear_screens()
@@ -111,8 +115,8 @@ func screen_hovered(screen_name):
 func screen_clicked(index : int):
 	$ScreenEditPanel.visible = true
 	$ScreenEditPanel.setup_screen_info(screen_list_info, index)
-	var spot_to_add = screen_list_info.field.linear_order_to_internal_position(index)
-	add_screen(spot_to_add.y, spot_to_add.z, \"New Test Screen\", index)
+	#var spot_to_add = screen_list_info.field.linear_order_to_internal_position(index)
+	#add_screen(spot_to_add.y, spot_to_add.z, \"New Test Screen\", index)
 "
 
 [node name="FieldMapView" type="Node2D"]

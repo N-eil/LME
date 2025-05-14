@@ -13,7 +13,7 @@ const ROOM_DIMENSIONS = Vector2i(45, 30)
 @export var internal_pos : Vector3i : 
 	set (c):
 		internal_pos = c
-		$Label.text = "%s   %s" % [c.y, c.z]
+		$Label.text = "%s , %s" % [c.y, c.z]
 @export var map_colour : MapColours :
 	set (c):
 		map_colour = c

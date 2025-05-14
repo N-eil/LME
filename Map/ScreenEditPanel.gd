@@ -44,10 +44,8 @@ func _on_icon_input_event(viewport, event, shape_idx, first_icon):
 				$VBoxContainer/HBoxContainer2/TextureRect/Icon2.frame = icon_and_colour_indexes.y
 			field_info.layout_card.entries[index_in_field].info[0][2] = ScreenplayCard.icon_vec_to_num(icon_and_colour_indexes)
 
-
 func _on_field_name_text_submitted(new_text):
 	field_info.name_card.entries[2].info[0] = new_text
-
 
 func _on_screen_name_text_submitted(new_text):
 	field_info.name_card.entries[index_in_field + 3].info[0] = new_text
