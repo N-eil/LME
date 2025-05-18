@@ -12,7 +12,12 @@ class_name RCDObject
 @export var write_byte_operations : Array
 @export var parameters : Array 
 
+# A custom name you can give an object. No ingame effect but useful when editing
+@export var editor_object_name : String = ""
+
 func _to_string():
+	if editor_object_name:
+		return editor_object_name
 	var object_name = ("0x%02X" % object_id)
 	return object_name + " " + Globals.OBJECT_REFERENCE[object_name]["name"]
 

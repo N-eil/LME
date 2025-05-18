@@ -2,12 +2,8 @@ extends PanelContainer
 @onready var parameter_prefab = load("res://ObjectParameterEdit.tscn")
 @onready var byte_operation_prefab = load("res://ByteOperationUI.tscn")
 
-# Declare member variables here. Examples:
-# var a = 2
-# var b = "text"
-
 var object : RCDObject
-@onready var object_list = $VSplitContainer/HBoxContainer/ObjectTypeMenu
+@onready var object_list = $VSplitContainer/VSplitContainer/HBoxContainer/ObjectTypeMenu
 # Called when the node enters the scene tree for the first time.
 func _ready():
 	for i in range(203):  #Hardcoded max of 203 objects are supported
@@ -54,7 +50,9 @@ func display(display_object : RCDObject):
 		var w = byte_operation_prefab.instantiate()
 		w.prefill_info(write_op.flag, write_op.operation, write_op.value, false)
 		$VSplitContainer/HSplitContainer/VSplitContainer/VSplitContainer/WriteFlagsUI.add_child(w)
-	
+
+	$VSplitContainer/VSplitContainer/ObjectRename.placeholder_text = str(object)
+
 	size = Vector2(0,0) # This is supposed to resize I think?  Not sure
 
 # Modifies the object that is passed in. Be careful!
@@ -94,11 +92,9 @@ func convert_data_to_object(new_object : RCDObject):
 func _on_SaveButton_pressed():
 	convert_data_to_object(object)
 
-
 func _on_ObjectTypeMenu_item_selected(index):
 	object.object_id = index
 	display(object)
-
 
 func _on_add_test_flag_button_pressed():
 	var t = byte_operation_prefab.instantiate()
@@ -125,3 +121,6 @@ func _on_save_object_dialog_file_selected(path):
 	var saving_object := RCDObject.new()
 	convert_data_to_object(saving_object)
 	ResourceSaver.save(saving_object, path)
+
+func _on_object_rename_text_submitted(new_text):
+	object.editor_object_name = new_text

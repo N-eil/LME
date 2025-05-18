@@ -13,14 +13,20 @@ script = ExtResource("1")
 layout_mode = 2
 dragger_visibility = 2
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VSplitContainer"]
+[node name="VSplitContainer" type="VSplitContainer" parent="VSplitContainer"]
 layout_mode = 2
 
-[node name="AddNewObjectCheckbox" type="CheckBox" parent="VSplitContainer/HBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VSplitContainer/VSplitContainer"]
+layout_mode = 2
+
+[node name="AddNewObjectCheckbox" type="CheckBox" parent="VSplitContainer/VSplitContainer/HBoxContainer"]
 layout_mode = 2
 text = "Add object"
 
-[node name="ObjectTypeMenu" type="OptionButton" parent="VSplitContainer/HBoxContainer"]
+[node name="ObjectTypeMenu" type="OptionButton" parent="VSplitContainer/VSplitContainer/HBoxContainer"]
+layout_mode = 2
+
+[node name="ObjectRename" type="LineEdit" parent="VSplitContainer/VSplitContainer"]
 layout_mode = 2
 
 [node name="HSplitContainer" type="HSplitContainer" parent="VSplitContainer"]
@@ -100,7 +106,8 @@ fit_content = true
 
 [node name="SaveObjectDialog" parent="." instance=ExtResource("3_vbwv0")]
 
-[connection signal="item_selected" from="VSplitContainer/HBoxContainer/ObjectTypeMenu" to="." method="_on_ObjectTypeMenu_item_selected"]
+[connection signal="item_selected" from="VSplitContainer/VSplitContainer/HBoxContainer/ObjectTypeMenu" to="." method="_on_ObjectTypeMenu_item_selected"]
+[connection signal="text_submitted" from="VSplitContainer/VSplitContainer/ObjectRename" to="." method="_on_object_rename_text_submitted"]
 [connection signal="pressed" from="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer/SaveButton" to="." method="_on_SaveButton_pressed"]
 [connection signal="pressed" from="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer/ToFileButton" to="." method="_on_to_file_button_pressed"]
 [connection signal="pressed" from="VSplitContainer/HSplitContainer/VBoxContainer/HBoxContainer/FromFileButton" to="." method="_on_from_file_button_pressed"]
