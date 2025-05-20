@@ -11,7 +11,7 @@ const TILESIZE = 20
 
 @export var stored_layer : Layer
 
-func _init(p_width = 0, p_height = 0, layer_info : Layer = null):
+func _init(p_width = 32, p_height = 24, layer_info : Layer = null):
 	height = p_height
 	width  = p_width
 	if layer_info == null or !(layer_info is Layer):
@@ -68,11 +68,11 @@ func set_tile_art(x,y,t : int,sublayer=0, flips = [false, false, false]):
 	print("Set tile to ", str(t))
 
 # Gets from an MSD, but all layers must be the same size
-static func generate_from_msd(msd : MSDMap, r_index : int = 0, l_index : int = 0):
-	var layer : Layer = msd.rooms[r_index].layers[l_index]
-	var to_return : LayerArtPortion = LayerArtPortion.new(layer.layer_width, layer.layer_height)
-	to_return.width = layer.layer_width
-	to_return.height = layer.layer_height
-	to_return.stored_layer = layer
-	to_return.tilesheet_filename = "res://GRAPHICS/" + msd.graphics_filename
-	return to_return
+#static func generate_from_msd(msd : MSDRoom, l_index : int = 0, graphics_filename : String = ""):
+	#var layer : Layer = msd.layers[l_index]
+	#var to_return : LayerArtPortion = LayerArtPortion.new(layer.layer_width, layer.layer_height)
+	#to_return.width = layer.layer_width
+	#to_return.height = layer.layer_height
+	#to_return.stored_layer = layer
+	#to_return.tilesheet_filename = "res://GRAPHICS/" + graphics_filename
+	#return to_return

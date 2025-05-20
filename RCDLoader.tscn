@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://RCDLoader.gd" id="1"]
 [ext_resource type="PackedScene" uid="uid://dcelqgdiyou5u" path="res://ObjectInfoSheet.tscn" id="2"]
-[ext_resource type="PackedScene" uid="uid://7cl5kojqt4rn" path="res://TileVisualDisplay/SublayerSelector.tscn" id="2_ip46p"]
+[ext_resource type="PackedScene" uid="uid://bw4rf58nqw8dx" path="res://TileVisualDisplay/sublayer_operations.tscn" id="2_taeo0"]
 [ext_resource type="PackedScene" uid="uid://bg8rvyokyatv8" path="res://TileVisualDisplay/LayerCompositeDisplay.tscn" id="4_j1fbf"]
 [ext_resource type="PackedScene" uid="uid://c2qy35xddt57r" path="res://TileVisualDisplay/tile_palette_window.tscn" id="4_l5aqg"]
 [ext_resource type="PackedScene" uid="uid://cty0wk2nlqm2i" path="res://TileCollision/collision_tilemap.tscn" id="5_5ct60"]
@@ -29,20 +29,8 @@ func _on_Collision_pressed():
 [node name="rcdloader" type="Node"]
 script = ExtResource("1")
 
-[node name="SublayerSelector" parent="." instance=ExtResource("2_ip46p")]
-offset_top = -706.0
-offset_bottom = -406.0
-
-[node name="RoomCanvas" type="Node2D" parent="."]
-position = Vector2(43.5581, 114.661)
-
-[node name="Objects" type="Node2D" parent="RoomCanvas"]
-z_index = 150
-
-[node name="Collision" type="Node2D" parent="RoomCanvas"]
-z_index = 200
-
-[node name="Visuals" type="Node2D" parent="RoomCanvas"]
+[node name="SublayerOperations" parent="." node_paths=PackedStringArray("composite_display") instance=ExtResource("2_taeo0")]
+composite_display = NodePath("../LayerCompositeDisplay")
 
 [node name="Node2D" type="Node2D" parent="."]
 z_index = 200
@@ -60,6 +48,7 @@ text = "Zone ID"
 
 [node name="ZoneEdit" type="LineEdit" parent="Node2D/RoomJump/HBoxContainer"]
 layout_mode = 2
+virtual_keyboard_type = 2
 
 [node name="HBoxContainer2" type="VBoxContainer" parent="Node2D/RoomJump"]
 layout_mode = 2
@@ -70,6 +59,7 @@ text = "Room ID"
 
 [node name="RoomEdit" type="LineEdit" parent="Node2D/RoomJump/HBoxContainer2"]
 layout_mode = 2
+virtual_keyboard_type = 2
 
 [node name="HBoxContainer3" type="VBoxContainer" parent="Node2D/RoomJump"]
 layout_mode = 2
@@ -122,6 +112,16 @@ text = "Add new screen"
 layout_mode = 2
 text = "Also add collision"
 
+[node name="ObjectCanvas" type="Node2D" parent="."]
+position = Vector2(64, 128)
+
+[node name="ObjectEditor" parent="." instance=ExtResource("2")]
+visible = false
+offset_left = 718.0
+offset_top = 85.0
+offset_right = 1358.0
+offset_bottom = 271.0
+
 [node name="EditType" type="TabContainer" parent="."]
 visible = false
 z_index = 5
@@ -148,20 +148,15 @@ layout_mode = 2
 layout_mode = 2
 text = "Collision"
 
-[node name="Objects" parent="EditType" instance=ExtResource("2")]
-visible = false
-layout_mode = 2
-
-[node name="LayerCompositeDisplay" parent="." node_paths=PackedStringArray("SublayerSelect") instance=ExtResource("4_j1fbf")]
+[node name="LayerCompositeDisplay" parent="." node_paths=PackedStringArray("SublayerOperations") instance=ExtResource("4_j1fbf")]
 position = Vector2(64, 128)
-SublayerSelect = NodePath("../SublayerSelector")
+SublayerOperations = NodePath("../SublayerOperations")
 
 [node name="CollisionTilemap" parent="." instance=ExtResource("5_5ct60")]
 visible = false
 position = Vector2(64, 128)
 
 [node name="FieldMapView" parent="." instance=ExtResource("7_hnrff")]
-visible = false
 position = Vector2(74, 205)
 
 [node name="ScreenplayEditor" parent="." instance=ExtResource("8_5d666")]

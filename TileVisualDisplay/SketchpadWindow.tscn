@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://TileVisualDisplay/SketchpadWindow.gd" id="1_cm8as"]
 [ext_resource type="PackedScene" uid="uid://bg8rvyokyatv8" path="res://TileVisualDisplay/LayerCompositeDisplay.tscn" id="2_3yw5a"]
-[ext_resource type="PackedScene" uid="uid://7cl5kojqt4rn" path="res://TileVisualDisplay/SublayerSelector.tscn" id="5_wjpwq"]
+[ext_resource type="PackedScene" uid="uid://bw4rf58nqw8dx" path="res://TileVisualDisplay/sublayer_operations.tscn" id="3_pets3"]
 [ext_resource type="PackedScene" uid="uid://ckbryhmvnye4g" path="res://Utils/load_object_dialog.tscn" id="6_j0pgi"]
 [ext_resource type="PackedScene" uid="uid://dmarwfkn1e40n" path="res://Utils/save_object_dialog.tscn" id="7_70lgv"]
 
@@ -11,9 +11,9 @@ position = Vector2i(0, 40)
 size = Vector2i(500, 500)
 script = ExtResource("1_cm8as")
 
-[node name="LayerCompositeDisplay" parent="." node_paths=PackedStringArray("SublayerSelect") instance=ExtResource("2_3yw5a")]
+[node name="LayerCompositeDisplay" parent="." node_paths=PackedStringArray("SublayerOperations") instance=ExtResource("2_3yw5a")]
 position = Vector2(-114, 25)
-SublayerSelect = NodePath("../Control/VBoxContainer/SublayerSelector")
+SublayerOperations = NodePath("../Control/VBoxContainer/SublayerOperations")
 
 [node name="Control" type="MarginContainer" parent="."]
 anchors_preset = 1
@@ -61,11 +61,10 @@ text = "Save to file"
 layout_mode = 2
 text = "Load from file"
 
-[node name="SublayerSelector" parent="Control/VBoxContainer" instance=ExtResource("5_wjpwq")]
-custom_minimum_size = Vector2(0, 100)
+[node name="SublayerOperations" parent="Control/VBoxContainer" node_paths=PackedStringArray("composite_display") instance=ExtResource("3_pets3")]
+visible = true
 layout_mode = 2
-size_flags_horizontal = 13
-size_flags_vertical = 15
+composite_display = NodePath("../../../LayerCompositeDisplay")
 
 [node name="LoadObjectDialog" parent="." instance=ExtResource("6_j0pgi")]
 

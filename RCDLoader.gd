@@ -113,7 +113,7 @@ func screen_exists(z, r = 0, s = 0):
 func _on_screen_selected(index):
 
 	Messages.emit_signal("new_art_palette", Globals.make_graphics_filename(current_msd_file.graphics_filename))
-	$LayerCompositeDisplay.generate_from_msd(current_msd_file, current_room_id, index)
+	$LayerCompositeDisplay.generate_from_msd(current_msd_file.rooms[current_room_id], index, current_msd_file.graphics_filename)
 	$CollisionTilemap.from_msd_room(current_msd_file.rooms[current_room_id], index)
 	#$LayerPortionDisplay.display_portion()
 	display_objects_in_screen($ObjectCanvas, current_zone_id, current_room_id, index)
@@ -144,7 +144,7 @@ func display_objects_in_screen(location, zone_id, room_id, screen_id):
 		location.add_child(o)
 		print("%s" % object)
 
-	var i = 2
+	var i = 2 # small starting buffer
 	for object in display_screen.screen_objects_without_position:
 		var o = object_placeholder_prefab.instantiate()
 		# Just place them all at the bottom of the screen below the art
@@ -372,15 +372,15 @@ func _on_edit_type_selected(index):
 			Globals.current_edit_type = Globals.EditType.NONE
 		1:
 			Globals.current_edit_type = Globals.EditType.ART
-			$SublayerSelector.visible = true
+			$SublayerOperations.visible = true
 		2:
 			Globals.current_edit_type = Globals.EditType.ART_COPY
 		3:
 			Globals.current_edit_type = Globals.EditType.COLLISION
-			$SublayerSelector.visible = false
+			$SublayerOperations.visible = false
 		4:
 			Globals.current_edit_type = Globals.EditType.OBJECT
-			$SublayerSelector.visible = false
+			$SublayerOperations.visible = false
 
 
 func set_workspace(path : String):

@@ -8,12 +8,14 @@ script/source = "extends Node2D
 var active_tileset : TileSet
 var active_tileset_filename : String
 var active_editing_sublayer : PaintableTileMap = null
+var active_screen_index : int = 0
+var underlying_display_data : Resource #Either an MSDRoom or a LayerArtPortion, will call appropriate display function
 
-@export var SublayerSelect : Tree
+@export var SublayerOperations : VSplitContainer
 @onready var _layer_holder := $LayerHolder
 
 func _ready():
-	SublayerSelect.activated.connect(start_editing_sublayer)
+	SublayerOperations.activated.connect(start_editing_sublayer)
 	Messages.connect(\"edit_type_changed\", edit_type_changed)
 
 #var all_layer_nodes : Array[LayerPortionDisplay]
@@ -37,17 +39,28 @@ func clear_display():
 	for c in _layer_holder.get_children():
 		c.free()
 
+# Generic function that generates based on the type of the stored data.
+# When you just want to re-generate, call this!
+func generate():
+	if underlying_display_data is MSDRoom:
+		generate_from_msd(underlying_display_data, active_screen_index)
+
+	elif underlying_display_data is LayerArtPortion:
+		generate_from_layer_portion(underlying_display_data)
+
 # Gets from an MSD, and creates the resources for each layer in the room
-func generate_from_msd(msd : MSDMap, r_index : int = 0, s_index = 0):
+func generate_from_msd(msd_room : MSDRoom, s_index = 0, graphics_filename : String = \"\"):
 	clear_display()
-	var msd_room : MSDRoom = msd.rooms[r_index]
+	underlying_display_data = msd_room
+	active_screen_index = s_index
 	var layer_z = 0
 	for layer in msd_room.layers:
 		var visual_layer : LayerPortionDisplay = portion_prefab.instantiate()
 		var to_display : LayerArtPortion = LayerArtPortion.new(layer.layer_width, layer.layer_height, layer)
-		to_display.tilesheet_filename = Globals.make_graphics_filename(msd.graphics_filename)
-		if to_display.tilesheet_filename != active_tileset_filename:
-			rebuild_tileset(to_display.tilesheet_filename)
+		if !graphics_filename.is_empty():
+			to_display.tilesheet_filename = Globals.make_graphics_filename(graphics_filename)
+			if to_display.tilesheet_filename != active_tileset_filename:
+				rebuild_tileset(to_display.tilesheet_filename)
 		_layer_holder.add_child(visual_layer)
 		visual_layer.active_tileset = active_tileset
 		visual_layer.z_index = layer_z
@@ -56,10 +69,11 @@ func generate_from_msd(msd : MSDMap, r_index : int = 0, s_index = 0):
 		visual_layer.top_left_offset = layer.get_top_left_2d(s_index)
 		visual_layer.display_portion()
 
-	SublayerSelect.fill_layer_UI(_layer_holder.get_children())
+	SublayerOperations.update_sublayer_info(underlying_display_data, _layer_holder.get_children())
 
 func generate_from_layer_portion(portion : LayerArtPortion):
 	clear_display()
+	underlying_display_data = portion
 	var visual_layer : LayerPortionDisplay = portion_prefab.instantiate()
 	
 	portion.tilesheet_filename = Globals.current_graphics_filename
@@ -74,9 +88,8 @@ func generate_from_layer_portion(portion : LayerArtPortion):
 	visual_layer.to_display = portion
 	visual_layer.top_left_offset = Vector2i.ZERO
 	visual_layer.display_portion()
-	
-	
-	SublayerSelect.fill_layer_UI(_layer_holder.get_children())
+
+	SublayerOperations.update_sublayer_info(underlying_display_data, _layer_holder.get_children())
 
 func get_sublayer_info_from_tree(tree_layer):
 	return Vector2(tree_layer.get_parent().get_index(), tree_layer.get_index())

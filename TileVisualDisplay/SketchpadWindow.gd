@@ -11,17 +11,10 @@ func convert_to_layer_data() -> LayerArtPortion:
 
 func _on_edit_type_changed(e):
 	visible = (e == Globals.EditType.ART || e == Globals.EditType.ART_COPY)
-#
-	#$Node2D/LayerPortionDisplay.to_display = LayerArtPortion.new(20,20)
-	#TileSetLoader.make_tileset(Globals.make_graphics_filename("map01_1.png"))
-	#$Node2D/LayerPortionDisplay.active_tileset = TileSetLoader.current_tileset
-	#$Node2D/LayerPortionDisplay.display_portion()
-	#$Node2D/LayerPortionDisplay.get_child(0).set_process_unhandled_input(visible)
 
 func _on_new_art_palette(e):
 	layer_display.rebuild_tileset(e)
-	#layer_display._layer_holder.get_child(0).display_portion()
-	layer_display.SublayerSelect.fill_layer_UI(layer_display._layer_holder.get_children())
+	layer_display.SublayerOperations.update_sublayer_info(null, layer_display._layer_holder.get_children())
 
 func set_sketchpad_art_with_backup(new_display : LayerArtPortion):
 	_on_save_object_dialog_file_selected("user://sketch-backup.tres")
@@ -55,7 +48,7 @@ func _on_create_button_pressed():
 	var new_art_height = $Control/VBoxContainer/HeightSetter.value
 	var new_art_layers = $Control/VBoxContainer/LayerCountSetter.value - 1 # The first sublayer comes with the initialization
 	
-	var new_art_portion = LayerArtPortion.new(new_art_width, new_art_height)
+	var new_art_portion := LayerArtPortion.new(new_art_width, new_art_height)
 	for i in range(new_art_layers):
 		new_art_portion.add_empty_sublayer()
 

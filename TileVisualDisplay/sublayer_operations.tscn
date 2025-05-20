@@ -1,0 +1,62 @@
+[gd_scene load_steps=3 format=3 uid="uid://bw4rf58nqw8dx"]
+
+[ext_resource type="Script" path="res://TileVisualDisplay/sublayer_operations.gd" id="1_rtnpf"]
+[ext_resource type="PackedScene" uid="uid://7cl5kojqt4rn" path="res://TileVisualDisplay/SublayerSelector.tscn" id="2_6o238"]
+
+[node name="SublayerOperations" type="VSplitContainer"]
+visible = false
+custom_minimum_size = Vector2(400, 600)
+offset_left = 809.0
+offset_top = 96.0
+offset_right = 849.0
+offset_bottom = 136.0
+script = ExtResource("1_rtnpf")
+
+[node name="LayerAdder" type="VSplitContainer" parent="."]
+layout_mode = 2
+
+[node name="HBoxContainer" type="HBoxContainer" parent="LayerAdder"]
+layout_mode = 2
+
+[node name="Width" type="LineEdit" parent="LayerAdder/HBoxContainer"]
+layout_mode = 2
+placeholder_text = "Width"
+virtual_keyboard_type = 2
+
+[node name="Height" type="LineEdit" parent="LayerAdder/HBoxContainer"]
+layout_mode = 2
+placeholder_text = "Height"
+virtual_keyboard_type = 2
+
+[node name="Ordering" type="LineEdit" parent="LayerAdder/HBoxContainer"]
+layout_mode = 2
+placeholder_text = "Order"
+virtual_keyboard_type = 2
+
+[node name="AddLayerButton" type="Button" parent="LayerAdder/HBoxContainer"]
+layout_mode = 2
+text = "Add Layer"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="LayerAdder"]
+layout_mode = 2
+
+[node name="Parent" type="LineEdit" parent="LayerAdder/HBoxContainer2"]
+layout_mode = 2
+placeholder_text = "Parent"
+virtual_keyboard_type = 2
+
+[node name="Ordering" type="LineEdit" parent="LayerAdder/HBoxContainer2"]
+layout_mode = 2
+placeholder_text = "Order"
+virtual_keyboard_type = 2
+
+[node name="AddSublayerButton" type="Button" parent="LayerAdder/HBoxContainer2"]
+layout_mode = 2
+text = "Add Sublayer
+"
+
+[node name="SublayerSelector" parent="." instance=ExtResource("2_6o238")]
+layout_mode = 2
+
+[connection signal="pressed" from="LayerAdder/HBoxContainer/AddLayerButton" to="." method="_on_add_layer_button_pressed"]
+[connection signal="pressed" from="LayerAdder/HBoxContainer2/AddSublayerButton" to="." method="_on_add_sublayer_button_pressed"]

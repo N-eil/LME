@@ -19,11 +19,6 @@ func _on_edit_type_changed(e):
 	#$Node2D/LayerPortionDisplay.active_tileset = TileSetLoader.current_tileset
 	#$Node2D/LayerPortionDisplay.display_portion()
 	#$Node2D/LayerPortionDisplay.get_child(0).set_process_unhandled_input(visible)
-#
-#func _on_new_art_palette(e):
-	#layer_display.rebuild_tileset(e)
-	##layer_display._layer_holder.get_child(0).display_portion()
-	#layer_display.SublayerSelect.fill_layer_UI(layer_display._layer_holder.get_children())
 
 func set_sketchpad_contents_with_backup(new_contents : Array[Array]):
 	#_on_save_object_dialog_file_selected("user://hitmask-backup.tres")
