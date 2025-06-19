@@ -70,7 +70,7 @@ const OBJECT_REFERENCE = {
 			"Land Sound",
 			"Pitch Shift"
 		],
-		"notes": "    Pitch shift is 48 000 Hz + shift * 10 Hz. That is, a shift of -500 will cause the sound effects to play at 43kHz, and a shift of 499 will cause the sound effects to play at 52 990 Hz. For pots, the pitch shift is varied randomly with each time a sound is played.\n \n",
+		"notes": "Drop type 1 = money, 2 = weights. weights cannot be higher than 1 quantity\n    Pitch shift is 48 000 Hz + shift * 10 Hz. That is, a shift of -500 will cause the sound effects to play at 43kHz, and a shift of 499 will cause the sound effects to play at 52 990 Hz. For pots, the pitch shift is varied randomly with each time a sound is played.",
 		"write_flag_notes": ""
 	},
 	"0x07": {

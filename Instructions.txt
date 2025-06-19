@@ -1,0 +1,20 @@
+LM editor controls and usage:
+
+
+ART MODE - 
+	When drawing on a tile drawing zone, select the tile you want from the album and then click to draw
+	Use right click to erase the tile 
+	If you want to copy a section to the workpad, ctrl-click the top left, then the bottom right
+	Use alt to paste the current workpad into the active layer
+	To draw, you need to select a sublayer (click in the menu, will highlight in red). Lower on the list = in front
+	The prime layer (determines size of room,  essentially the main layer) has blue text. 
+
+COLLISION MODE - 
+	Basically the same as art mode
+	Tiles are half the size though so careful how you draw
+	
+
+
+
+
+Edit slate00 or slate01 to put visuals on tablets

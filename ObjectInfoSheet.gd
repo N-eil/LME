@@ -23,6 +23,9 @@ func display(display_object : RCDObject):
 
 	object_list.select(display_object.object_id)
 	$VSplitContainer/HSplitContainer/VSplitContainer/ExtraNotes.text = Globals.OBJECT_REFERENCE[("0x%02X" % display_object.object_id)]["notes"] + "\n" + Globals.OBJECT_REFERENCE[("0x%02X" % object.object_id)]["write_flag_notes"]
+	$VSplitContainer/VSplitContainer/HBoxContainer/HSplitContainer/PositionX.text = str(object.position_x)
+	$VSplitContainer/VSplitContainer/HBoxContainer/HSplitContainer2/PositionY.text = str(object.position_y)
+	
 	
 	var param_desc = Globals.OBJECT_REFERENCE[("0x%02X" % display_object.object_id)]["parameter_descriptions"]
 	var param_count = Globals.OBJECT_REFERENCE[("0x%02X" % display_object.object_id)]["parameter_count"]
@@ -61,6 +64,8 @@ func convert_data_to_object(new_object : RCDObject):
 	new_object.parameters = []
 	new_object.test_byte_operations = []
 	new_object.write_byte_operations = []
+	new_object.position_x = int($VSplitContainer/VSplitContainer/HBoxContainer/HSplitContainer/PositionX.text)
+	new_object.position_y = int($VSplitContainer/VSplitContainer/HBoxContainer/HSplitContainer2/PositionY.text)
 	for p in $VSplitContainer/HSplitContainer/VBoxContainer.get_children():
 		if p is HSplitContainer:
 			print(p.get_child(1).value)
